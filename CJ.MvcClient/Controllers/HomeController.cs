@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CJ.MvcClient.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
 
 namespace CJ.MvcClient.Controllers
 {
@@ -34,6 +35,12 @@ namespace CJ.MvcClient.Controllers
     public IActionResult Error()
     {
       return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+
+    public async Task Logout()
+    {
+      await HttpContext.SignOutAsync("Cookies");
+      await HttpContext.SignOutAsync("oidc");
     }
   }
 }

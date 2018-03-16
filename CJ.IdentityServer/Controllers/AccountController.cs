@@ -13,6 +13,10 @@ using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using CJ.IdentityServer.Services;
+using CJ.IdentityServer.ViewModels.AccountViewModels;
 
 namespace CJ.IdentityServer.Controllers
 {
@@ -20,14 +24,30 @@ namespace CJ.IdentityServer.Controllers
   {
     private LoginControllerHelper _loginHelper;
 
+    //private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+
     private readonly IIdentityServerInteractionService _interaction;
     private readonly IAuthenticationSchemeProvider _schemeProvider;
     private readonly IClientStore _clientStore;
     private readonly IEventService _events;
 
-    public AccountController(IIdentityServerInteractionService interaction, IAuthenticationSchemeProvider schemeProvider,
-      IClientStore clientStore, IEventService events)
+    private readonly IEmailSender _emailSender;
+    private readonly ILogger _logger;
+
+
+    public AccountController(
+        //UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager, 
+        IIdentityServerInteractionService interaction,
+        IAuthenticationSchemeProvider schemeProvider,
+        IClientStore clientStore, 
+        IEventService events,
+        IEmailSender emailSender,
+        ILogger<AccountController> logger)
     {
+      //_userManager = userManager;
+      _signInManager = signInManager;
       _interaction = interaction;
       _schemeProvider = schemeProvider;
       _clientStore = clientStore;
@@ -35,6 +55,8 @@ namespace CJ.IdentityServer.Controllers
       
       _loginHelper = new LoginControllerHelper(_interaction, _schemeProvider, _clientStore);
     }
+
+    #region Login
 
     public async Task<IActionResult> Login(string returnUrl)
     {
@@ -49,6 +71,9 @@ namespace CJ.IdentityServer.Controllers
       return View(vm);
     }
 
+    #endregion
+
+    #region External Login
     /// <summary>
     /// initiate roundtrip to external authentication provider
     /// </summary>
@@ -150,6 +175,41 @@ namespace CJ.IdentityServer.Controllers
       }
     }
 
-    
+    #endregion
+
+    #region Logout
+
+    [HttpGet]
+    public async Task<IActionResult> Logout(string logoutId)
+    {
+      await _signInManager.SignOutAsync();
+      _logger.LogInformation("User logged out.");
+
+      var logout = await _interaction.GetLogoutContextAsync(logoutId);
+
+      var vm = new LoggedOutVM
+      {
+        AutomaticRedirectAfterSignOut = AccountOptions.AutomaticRedirectAfterSignOut,
+        PostLogoutRedirectUri = logout?.PostLogoutRedirectUri,
+        ClientName = string.IsNullOrEmpty(logout?.ClientName) ? logout?.ClientId : logout?.ClientName,
+        SignOutIframeUrl = logout?.SignOutIFrameUrl,
+        LogoutId = logoutId
+      };
+
+      return View("LoggedOut", vm);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Logout()
+    {
+      await _signInManager.SignOutAsync();
+      _logger.LogInformation("User logged out.");
+      return RedirectToAction(nameof(HomeController.Index), "Home");
+    }
+
+    #endregion
+
+
   }
 }

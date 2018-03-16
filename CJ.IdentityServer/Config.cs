@@ -19,7 +19,7 @@ namespace CJ.IdentityServer
             ClientId = "mvc",
             ClientName = "MVC Client",
             AllowedGrantTypes = GrantTypes.Hybrid,
-            RequireConsent = false,
+            RequireConsent = true,
             ClientSecrets =
             {
               new Secret("secret".Sha256()) 
@@ -29,7 +29,7 @@ namespace CJ.IdentityServer
             RedirectUris = { appSettings["SignInReturnUri"] }, // "http://localhost:5002/signin-oidc" },
 
             // where to redirect to after logout
-            PostLogoutRedirectUris = { appSettings["PostSignOutUri"] },
+            PostLogoutRedirectUris = { appSettings["PostSignOutUri"] }, // http://localhost:5002/signout-callback-oidc
 
             AllowedScopes = new List<string>
             {
