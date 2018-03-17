@@ -1,0 +1,12 @@
+﻿@{
+  var identityServerAuthority = ViewData["IdentityServerAuthority"].ToString();
+}
+
+<ul class="nav navbar-nav navbar-right">
+  @if (User.Identity.IsAuthenticated)
+  {
+
+    <li><a href="@identityServerAuthority/Manage/Index" title="Manage">Hello @ViewHelper.GetUserName(User.Claims)!</a></li>
+    <li><a asp-area="" asp-controller="Home" asp-action="Logout">Logout</a></li>
+  }
+</ul>

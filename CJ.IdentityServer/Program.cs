@@ -29,7 +29,8 @@ namespace CJ.IdentityServer
         return WebHost.CreateDefaultBuilder(args)
            .UseStartup<Startup>()
            .Build();
-      } else
+      }
+      else
       {
         return new WebHostBuilder()
           .UseKestrel()

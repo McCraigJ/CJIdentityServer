@@ -7,14 +7,22 @@ using Microsoft.AspNetCore.Mvc;
 using CJ.MvcClient.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Configuration;
+using CJ.MvcClient.Filters;
 
 namespace CJ.MvcClient.Controllers
 {
-  public class HomeController : Controller
-  {
+  
+  public class HomeController : ControllerBase
+  {      
     public IActionResult Index()
     {
       return View();
+    }
+
+    public IActionResult LoginPartial()
+    {      
+      return View("_LoginPartial");
     }
 
     [Authorize]

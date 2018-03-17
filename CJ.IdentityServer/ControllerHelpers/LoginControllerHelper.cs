@@ -81,6 +81,14 @@ namespace CJ.IdentityServer.ControllerHelpers
       };
     }
 
+    public async Task<LoginVM> BuildLoginViewModelAsync(LoginInputVM model)
+    {
+      var vm = await BuildLoginViewModelAsync(model.ReturnUrl);
+      vm.Username = model.Username;
+      vm.RememberLogin = model.RememberLogin;
+      return vm;
+    }
+
     public (ApplicationUser user, string provider, string providerUserId, IEnumerable<Claim> claims) FindUserInfoFromWindowsAuthProvidor(AuthenticateResult result)
     {
       var externalUser = result.Principal;
