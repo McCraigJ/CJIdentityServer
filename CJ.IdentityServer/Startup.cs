@@ -53,7 +53,7 @@ namespace CJ.IdentityServer
         //.AddInMemoryApiResources(Config.GetApiResources())
         .AddInMemoryIdentityResources(Config.GetIdentityResources())
         .AddInMemoryClients(Config.GetClients(_appSettings))
-        .AddAspNetIdentity<ApplicationUser>();
+        .AddAspNetIdentity<ApplicationUser>();      
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

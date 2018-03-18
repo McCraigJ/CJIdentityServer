@@ -21,6 +21,8 @@ using IdentityServer4.Models;
 using Microsoft.AspNetCore.Authorization;
 using CJ.IdentityServer.Extensions;
 using AutoMapper;
+using CJ.IdentityServer.Data;
+using Microsoft.Extensions.Configuration;
 
 namespace CJ.IdentityServer.Controllers
 {
@@ -29,6 +31,7 @@ namespace CJ.IdentityServer.Controllers
     private LoginControllerHelper _loginHelper;
 
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
 
     private readonly IIdentityServerInteractionService _interaction;
@@ -38,19 +41,23 @@ namespace CJ.IdentityServer.Controllers
 
     private readonly IEmailSender _emailSender;
     private readonly ILogger _logger;
+    private readonly IConfiguration _configuration;
 
 
     public AccountController(
         UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager,
         SignInManager<ApplicationUser> signInManager, 
         IIdentityServerInteractionService interaction,
         IAuthenticationSchemeProvider schemeProvider,
         IClientStore clientStore, 
         IEventService events,
         IEmailSender emailSender,
-        ILogger<AccountController> logger)
+        ILogger<AccountController> logger,
+        IConfiguration configuration)
     {
       _userManager = userManager;
+      _roleManager = roleManager;
       _signInManager = signInManager;
       _interaction = interaction;
       _schemeProvider = schemeProvider;
@@ -58,9 +65,21 @@ namespace CJ.IdentityServer.Controllers
       _events = events;
       _emailSender = emailSender;
       _logger = logger;
+      _configuration = configuration;
       
       _loginHelper = new LoginControllerHelper(_interaction, _schemeProvider, _clientStore);
     }
+
+    #region Seed Data
+
+    public IActionResult SeedData()
+    {
+      var dataSeeder = new DataSeeder(_userManager, _roleManager, _configuration);
+      dataSeeder.CreateDefaultData();
+      return RedirectToAction("Login");
+    }
+
+    #endregion
 
     #region Login
 
