@@ -17,30 +17,9 @@ namespace CJ.IdentityServer
       BuildWebHost(args).Run();
     }
 
-    public static IWebHost BuildWebHost(string[] args) => BuildWebHost(args, true);
-        //WebHost.CreateDefaultBuilder(args)
-        //    .UseStartup<Startup>()
-        //    .Build();
-
-    private static IWebHost BuildWebHost(string[] args, bool useDefaultBuilder)
-    {
-      if (useDefaultBuilder)
-      {
-        return WebHost.CreateDefaultBuilder(args)
-           .UseStartup<Startup>()
-           .Build();
-      }
-      else
-      {
-        return new WebHostBuilder()
-          .UseKestrel()
-          .UseUrls("http://localhost:5000")
-          .UseContentRoot(Directory.GetCurrentDirectory())
-          .UseIISIntegration()
-          .UseStartup<Startup>()
-          .Build();
-
-      }
-    }
+    public static IWebHost BuildWebHost(string[] args) =>
+        WebHost.CreateDefaultBuilder(args)
+            .UseStartup<Startup>()
+            .Build();    
   }
 }

@@ -109,6 +109,7 @@ namespace CJ.IdentityServer.ControllerHelpers
 
       // find external user
       //var user = //_users.FindByExternalProvider(provider, providerUserId);
+      
       var user = new ApplicationUser
       {
         Id = userIdClaim.Value,

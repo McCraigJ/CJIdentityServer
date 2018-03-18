@@ -10,6 +10,13 @@ namespace CJ.IdentityServer.Models
     Standard = 1,
     Windows = 2
   }
+
+  public enum UserRoles
+  {
+    Standard = 1,
+    SystemAdmin = 2
+  }
+
   public class UserSM
   {
     public int Id { get; set; }

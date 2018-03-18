@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace CJ.IdentityServer.Data
 {
-  public class IdentityDataContext : IdentityDbContext<ApplicationUser>
+  public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
   {
-    public IdentityDataContext(DbContextOptions<IdentityDataContext> options)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
     }
@@ -23,7 +23,7 @@ namespace CJ.IdentityServer.Data
       // Add your customizations after calling base.OnModelCreating(builder);      
     }
 
-    public DbSet<ApplicationUser> ApplicationUser { get; set; }
+    //public DbSet<ApplicationUser> ApplicationUser { get; set; }
 
   }
 }

@@ -8,8 +8,11 @@ using System.Threading.Tasks;
 
 namespace CJ.IdentityServer
 {
-  public static class Config
+  public static class Config    
   {
+
+    public const string WindowsUserPassword = "D3309ssda_01-29940";
+
     public static List<Client> GetClients(IConfigurationSection appSettings)
     {
       var clients = new List<Client>
@@ -18,8 +21,9 @@ namespace CJ.IdentityServer
         {
             ClientId = "mvc",
             ClientName = "MVC Client",
-            AllowedGrantTypes = GrantTypes.Hybrid,
+            AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
             RequireConsent = true,
+            AlwaysIncludeUserClaimsInIdToken = true,
             ClientSecrets =
             {
               new Secret("secret".Sha256()) 

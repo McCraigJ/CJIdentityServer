@@ -13,6 +13,7 @@ using IdentityServer4.Services;
 using CJ.IdentityServer.Models;
 using CJ.IdentityServer.Data;
 using CJ.IdentityServer.Services;
+using AutoMapper;
 
 namespace CJ.IdentityServer
 {
@@ -31,20 +32,20 @@ namespace CJ.IdentityServer
     // This method gets called by the runtime. Use this method to add services to the container.
     // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
     public void ConfigureServices(IServiceCollection services)
-    {      
-      services.AddDbContext<IdentityDataContext>(options =>
-          options.UseSqlServer(_configuration.GetConnectionString("DefaultConnection")));
-
-      services.AddDbContext<ApplicationDataContext>(options =>
+    {
+      services.AddDbContext<ApplicationDbContext>(options =>
           options.UseSqlServer(_configuration.GetConnectionString("DefaultConnection")));
 
       services.AddIdentity<ApplicationUser, IdentityRole>()
-          .AddEntityFrameworkStores<IdentityDataContext>()
+          .AddEntityFrameworkStores<ApplicationDbContext>()
           .AddDefaultTokenProviders();
 
+
       services.AddTransient<IEmailSender, EmailSender>();
+      //services.AddTransient<IProfileService, ProfileService>();
 
       services.AddMvc();
+      services.AddAutoMapper();
 
       services.AddIdentityServer()
         .AddDeveloperSigningCredential()

@@ -20,6 +20,7 @@ using CJ.IdentityServer.ViewModels.AccountViewModels;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Authorization;
 using CJ.IdentityServer.Extensions;
+using AutoMapper;
 
 namespace CJ.IdentityServer.Controllers
 {
@@ -170,26 +171,44 @@ namespace CJ.IdentityServer.Controllers
         throw new Exception("External authentication error");
       }
 
-      // lookup our user and external provider info
-      var (user, provider, providerUserId, claims) = _loginHelper.FindUserInfoFromWindowsAuthProvidor(result);
-      //if (user == null)
-      //{
-      //  // this might be where you might initiate a custom workflow for user registration
-      //  // in this sample we don't show how that would be done, as our sample implementation
-      //  // simply auto-provisions new external user
-      //  user = AutoProvisionUser(provider, providerUserId, claims);
-      //}
+      var externalUser = result.Principal;
 
+      // try to determine the unique id of the external user (issued by the provider)
+      // the most common claim type for that are the sub claim and the NameIdentifier
+      // depending on the external provider, some other claim type might be used
+      var userIdClaim = externalUser.FindFirst(JwtClaimTypes.Subject) ??
+                        externalUser.FindFirst(ClaimTypes.NameIdentifier) ??
+                        throw new Exception("Unknown userid");
+
+      // remove the user id claim so we don't include it as an extra claim if/when we provision the user
+      var claims = externalUser.Claims.ToList();
+      claims.Remove(userIdClaim);
+
+      var provider = result.Properties.Items["scheme"];
+      var providerUserId = userIdClaim.Value;
+      
+      var userName = providerUserId.Split('\\').LastOrDefault();
+      if (string.IsNullOrEmpty(userName))
+      {
+        userName = providerUserId;
+      }
+      var user = await _userManager.FindByNameAsync(userName);
+      if (user == null)
+      {
+        user = new ApplicationUser { UserName = userName, Id = providerUserId, UserType = (int)UserType.Windows };
+        var createResult = await _userManager.CreateAsync(user, Config.WindowsUserPassword);
+      }
+            
       // this allows us to collect any additonal claims or properties
       // for the specific prtotocols used and store them in the local auth cookie.
       // this is typically used to store data needed for signout from those protocols.
       var additionalLocalClaims = new List<Claim>();
       var localSignInProps = new AuthenticationProperties();
-      _loginHelper.ProcessLoginCallbackForOidc(result, additionalLocalClaims, localSignInProps);      
-
+      _loginHelper.ProcessLoginCallbackForOidc(result, additionalLocalClaims, localSignInProps);
+      
       // issue authentication cookie for user
-      await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.UserName, user.UserName));
-      await HttpContext.SignInAsync(user.UserName, user.UserName, provider, localSignInProps, additionalLocalClaims.ToArray());
+      await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.UserName, user.UserName));      
+      await HttpContext.SignInAsync(user.Id, user.UserName, provider, localSignInProps, additionalLocalClaims.ToArray());
 
       // delete temporary cookie used during external authentication
       await HttpContext.SignOutAsync(IdentityServer4.IdentityServerConstants.ExternalCookieAuthenticationScheme);
@@ -306,7 +325,10 @@ namespace CJ.IdentityServer.Controllers
       ViewData["ReturnUrl"] = returnUrl;
       if (ModelState.IsValid)
       {
-        var user = new ApplicationUser { UserName = model.Email, Email = model.Email, PhoneNumber = model.PhoneNumber };
+        var user = Mapper.Map<ApplicationUser>(model);
+        user.UserType = (int)UserType.Standard;
+
+        //var user = new ApplicationUser { UserName = model.Email, Email = model.Email, PhoneNumber = model.PhoneNumber };
         var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
         {

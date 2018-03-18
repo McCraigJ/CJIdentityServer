@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using AutoMapper;
 using CJ.IdentityServer.Extensions;
 using CJ.IdentityServer.Models;
 using CJ.IdentityServer.Services;
@@ -61,16 +62,8 @@ namespace CJ.IdentityServer.Controllers
       {
         throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
       }
-
-      var model = new ManageVM
-      {
-        Username = user.UserName,
-        Email = user.Email,
-        PhoneNumber = user.PhoneNumber,
-        IsEmailConfirmed = user.EmailConfirmed,
-        StatusMessage = StatusMessage        
-        
-      };
+      var model = Mapper.Map<ManageVM>(user);
+      model.StatusMessage = StatusMessage;
 
       return View(model);
     }
@@ -91,7 +84,9 @@ namespace CJ.IdentityServer.Controllers
       }
 
       user.Email = model.Email;
-      user.PhoneNumber = model.PhoneNumber;      
+      user.PhoneNumber = model.PhoneNumber;
+      user.FirstName = model.FirstName;
+      user.LastName = model.LastName;
 
       var updateResult = await _userManager.UpdateAsync(user);
       if (!updateResult.Succeeded)
