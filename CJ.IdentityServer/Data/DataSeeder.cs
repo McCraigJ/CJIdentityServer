@@ -25,7 +25,7 @@ namespace CJ.IdentityServer.Data
       _appSettings = configuration.GetSection("AppSettings");
     }
 
-    public async void CreateDefaultData()
+    public async Task CreateDefaultData()
     {
       if (Convert.ToBoolean(_appSettings["SeedData"]) == true)
       {

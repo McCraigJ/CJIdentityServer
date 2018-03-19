@@ -72,10 +72,11 @@ namespace CJ.IdentityServer.Controllers
 
     #region Seed Data
 
-    public IActionResult SeedData()
+    public async Task<IActionResult> SeedData()
     {
       var dataSeeder = new DataSeeder(_userManager, _roleManager, _configuration);
-      dataSeeder.CreateDefaultData();
+      await dataSeeder.CreateDefaultData();
+
       return RedirectToAction("Login");
     }
 

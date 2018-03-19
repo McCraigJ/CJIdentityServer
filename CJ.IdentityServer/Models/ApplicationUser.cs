@@ -10,12 +10,6 @@ namespace CJ.IdentityServer.Models
   {
     public string FirstName { get; set; }
     public string LastName { get; set; }
-    public int UserType { get; set; }
-    public string UserRole { get; set; }
-
-    public ApplicationUser()
-    {
-      UserRole = UserRoles.Standard.ToString();
-    }
+    public int UserType { get; set; }    
   }
 }

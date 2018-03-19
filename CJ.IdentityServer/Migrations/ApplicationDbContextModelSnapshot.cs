@@ -62,8 +62,6 @@ namespace CJ.IdentityServer.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256);
 
-                    b.Property<string>("UserRole");
-
                     b.Property<int>("UserType");
 
                     b.HasKey("Id");

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace CJ.IdentityServer.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class AspNetIdentity : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -44,7 +44,6 @@ namespace CJ.IdentityServer.Migrations
                     SecurityStamp = table.Column<string>(nullable: true),
                     TwoFactorEnabled = table.Column<bool>(nullable: false),
                     UserName = table.Column<string>(maxLength: 256, nullable: true),
-                    UserRole = table.Column<string>(nullable: true),
                     UserType = table.Column<int>(nullable: false)
                 },
                 constraints: table =>

@@ -11,8 +11,8 @@ using System;
 namespace CJ.IdentityServer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20180318030659_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20180319163435_AspNetIdentity")]
+    partial class AspNetIdentity
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -62,8 +62,6 @@ namespace CJ.IdentityServer.Migrations
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256);
-
-                    b.Property<string>("UserRole");
 
                     b.Property<int>("UserType");
 

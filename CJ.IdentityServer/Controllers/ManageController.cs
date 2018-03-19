@@ -6,6 +6,7 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using AutoMapper;
 using CJ.IdentityServer.Extensions;
+using CJ.IdentityServer.Helpers;
 using CJ.IdentityServer.Models;
 using CJ.IdentityServer.Services;
 using CJ.IdentityServer.ViewModels.ManageViewModels;
@@ -154,6 +155,11 @@ namespace CJ.IdentityServer.Controllers
       if (user == null)
       {
         throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+      }
+
+      if (ViewHelper.GetIdentityProvider(User.Claims) != "local")
+      {
+        throw new ApplicationException($"Cannot set a password for a non-local user '{_userManager.GetUserId(User)}'.");
       }
 
       var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);

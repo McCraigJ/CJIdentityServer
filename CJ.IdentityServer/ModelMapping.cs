@@ -16,7 +16,7 @@ namespace CJ.IdentityServer
       CreateMap<ApplicationUser, ManageVM>()
         .ForMember(x => x.Username, a => a.MapFrom(b => b.UserName))
         .ForMember(x => x.IsEmailConfirmed, a => a.MapFrom(b => b.EmailConfirmed))
-        .ForMember(x => x.UserType, a => a.MapFrom(b => ((UserType)b.UserType).ToString()));
+        .ForMember(x => x.UserType, a => a.MapFrom(b => ((UserType)b.UserType)));
 
       CreateMap<RegisterVM, ApplicationUser>()
         .ForMember(x => x.UserName, a => a.MapFrom(b => b.Email));        

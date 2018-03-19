@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CJ.IdentityServer.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -31,10 +32,8 @@ namespace CJ.IdentityServer.ViewModels.ManageViewModels
     [Display(Name = "Last Name")]
     public string LastName { get; set; }
 
-    [ReadOnly(true)]
-    [Display(Name = "Login Type")]
-    public string UserType { get; set; }
-
+    public UserType UserType { get; set; }
+    
     [ReadOnly(true)]
     [Display(Name = "User Role")]
     public string UserRole { get; set; }
