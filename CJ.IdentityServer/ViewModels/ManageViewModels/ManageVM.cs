@@ -32,6 +32,8 @@ namespace CJ.IdentityServer.ViewModels.ManageViewModels
     [Display(Name = "Last Name")]
     public string LastName { get; set; }
 
+    [ReadOnly(true)]
+    [Display(Name = "Login Type")]
     public UserType UserType { get; set; }
     
     [ReadOnly(true)]
