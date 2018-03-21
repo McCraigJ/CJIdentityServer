@@ -3,9 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CJ.IdentityServer", "CJ.IdentityServer\CJ.IdentityServer.csproj", "{1718EEFD-13A3-4D96-A6F5-5756DC54BAAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CJ.IdentityServer.Web", "CJ.IdentityServer.Web\CJ.IdentityServer.Web.csproj", "{1718EEFD-13A3-4D96-A6F5-5756DC54BAAC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CJ.MvcClient", "CJ.MvcClient\CJ.MvcClient.csproj", "{FAFFDD99-2F45-4985-AE65-7A4BE0ADA652}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CJ.MvcClient", "CJ.MvcClient\CJ.MvcClient.csproj", "{FAFFDD99-2F45-4985-AE65-7A4BE0ADA652}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CJ.IdentityServer", "CJ.IdentityServer", "{7A391513-84C9-441B-90FB-7A31F082D10F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interfaces", "Interfaces", "{FE99C326-233C-475A-B109-41D3228B7F47}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{4B0F44EB-80F0-48B9-B935-A2B9B5B9F6CF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{8ACB353A-BE23-416A-A96B-46D05B76416E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +32,12 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1718EEFD-13A3-4D96-A6F5-5756DC54BAAC} = {7A391513-84C9-441B-90FB-7A31F082D10F}
+		{FE99C326-233C-475A-B109-41D3228B7F47} = {7A391513-84C9-441B-90FB-7A31F082D10F}
+		{4B0F44EB-80F0-48B9-B935-A2B9B5B9F6CF} = {7A391513-84C9-441B-90FB-7A31F082D10F}
+		{8ACB353A-BE23-416A-A96B-46D05B76416E} = {7A391513-84C9-441B-90FB-7A31F082D10F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {78DB1225-3102-46D1-B26B-4103F00F8EE3}
