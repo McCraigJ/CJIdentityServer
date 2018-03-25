@@ -33,47 +33,23 @@ namespace CJ.IdentityServer.Web.Controllers
   {
     private LoginControllerHelper _loginHelper;
 
-    private readonly IAccountService _accountService;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-
-    private readonly IIdentityServerInteractionService _interaction;
-    private readonly IAuthenticationSchemeProvider _schemeProvider;
-    private readonly IClientStore _clientStore;
-    private readonly IEventService _events;
+    private readonly IAccountService _accountService;    
 
     private readonly IEmailSender _emailSender;
     private readonly ILogger _logger;
-    private readonly IConfiguration _configuration;
 
 
     public AccountController(
-        IAccountService accountService,
-        UserManager<ApplicationUser> userManager,
-        RoleManager<IdentityRole> roleManager,
-        SignInManager<ApplicationUser> signInManager, 
-        IIdentityServerInteractionService interaction,
+        IAccountService accountService,  
         IAuthenticationSchemeProvider schemeProvider,
-        IClientStore clientStore, 
-        IEventService events,
         IEmailSender emailSender,
-        ILogger<AccountController> logger,
-        IConfiguration configuration)
+        ILogger<AccountController> logger)
     {
-      _accountService = accountService;
-      _userManager = userManager;
-      _roleManager = roleManager;
-      _signInManager = signInManager;
-      _interaction = interaction;
-      _schemeProvider = schemeProvider;
-      _clientStore = clientStore;
-      _events = events;
+      _accountService = accountService;            
       _emailSender = emailSender;
       _logger = logger;
-      _configuration = configuration;
       
-      _loginHelper = new LoginControllerHelper(_interaction, _schemeProvider, _clientStore);
+      _loginHelper = new LoginControllerHelper(schemeProvider, _accountService);
     }
 
     #region Seed Data
@@ -136,7 +112,7 @@ namespace CJ.IdentityServer.Web.Controllers
 
           // make sure the returnUrl is still valid, and if so redirect back to authorize endpoint or a local page
           // the IsLocalUrl check is only necessary if you want to support additional local pages, otherwise IsValidReturnUrl is more strict
-          if (_interaction.IsValidReturnUrl(model.ReturnUrl) || Url.IsLocalUrl(model.ReturnUrl))
+          if (_accountService.IsValidReturnUrl(model.ReturnUrl) || Url.IsLocalUrl(model.ReturnUrl))
           {
             return Redirect(model.ReturnUrl);
           }
@@ -221,7 +197,7 @@ namespace CJ.IdentityServer.Web.Controllers
 
       // validate return URL and redirect back to authorization endpoint or a local page
       var returnUrl = result.Properties.Items["returnUrl"];
-      if (_interaction.IsValidReturnUrl(returnUrl) || Url.IsLocalUrl(returnUrl))
+      if (_accountService.IsValidReturnUrl(returnUrl) || Url.IsLocalUrl(returnUrl))
       {
         return Redirect(returnUrl);
       }
@@ -398,14 +374,7 @@ namespace CJ.IdentityServer.Web.Controllers
           // Don't reveal that the user does not exist or is not confirmed
           return RedirectToAction(nameof(ForgotPasswordConfirmation));
         }
-        
-
-        //var user = await _userManager.FindByEmailAsync(model.Email);
-        //if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
-        //{
-
-        //}
-
+                
         // For more information on how to enable account confirmation and password reset please
         // visit https://go.microsoft.com/fwlink/?LinkID=532713
         //var code = await _userManager.GeneratePasswordResetTokenAsync(user);

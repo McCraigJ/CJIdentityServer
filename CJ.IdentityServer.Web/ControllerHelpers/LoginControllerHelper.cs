@@ -13,26 +13,29 @@ using CJ.IdentityServer.Web.ViewModels.AccountViewModels;
 using System.Collections.Generic;
 using CJ.IdentityServer.Web.Models;
 using CJ.IdentityServer.Services.Models;
+using CJ.IdentityServer.Interfaces.Account;
+using CJ.IdentityServer.ServiceModels.Client;
 
 namespace CJ.IdentityServer.Web.ControllerHelpers
 {
   public class LoginControllerHelper
-  {
-    private readonly IIdentityServerInteractionService _interaction;
+  {    
     private readonly IAuthenticationSchemeProvider _schemeProvider;
-    private readonly IClientStore _clientStore;
+    private readonly IAccountService _accountService;    
 
-    public LoginControllerHelper(IIdentityServerInteractionService interaction, IAuthenticationSchemeProvider schemeProvider,
-      IClientStore clientStore)
+    public LoginControllerHelper(
+      IAuthenticationSchemeProvider schemeProvider,
+      IAccountService accountService)
     {
-      _interaction = interaction;
       _schemeProvider = schemeProvider;
-      _clientStore = clientStore;
+      _accountService = accountService;
     }
 
     public async Task<LoginVM> BuildLoginViewModelAsync(string returnUrl)
     {
-      var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+      var context = await _accountService.GetAuthorizationContextAsync(returnUrl);
+
+      //var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
       if (context?.IdP != null)
       {
         // this is meant to short circuit the UI and only trigger the one external IdP
@@ -60,7 +63,7 @@ namespace CJ.IdentityServer.Web.ControllerHelpers
       var allowLocal = true;
       if (context?.ClientId != null)
       {
-        var client = await _clientStore.FindEnabledClientByIdAsync(context.ClientId);
+        var client = await _accountService.FindEnabledClientByIdAsync(context.ClientId);
         if (client != null)
         {
           allowLocal = client.EnableLocalLogin;

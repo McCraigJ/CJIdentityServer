@@ -1,5 +1,6 @@
 ﻿using CJ.IdentityServer.Interfaces.Account;
 using CJ.IdentityServer.ServiceModels;
+using CJ.IdentityServer.ServiceModels.Client;
 using CJ.IdentityServer.ServiceModels.Login;
 using CJ.IdentityServer.ServiceModels.User;
 using CJ.IdentityServer.Services.Data;
@@ -192,6 +193,23 @@ namespace CJ.IdentityServer.Services.Account
       await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, subjectId, name));      
     }
 
+    public async Task<AuthorisationRequestSM> GetAuthorizationContextAsync(string returnUrl)
+    {
+      var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+      return AutoMapper.Mapper.Map<AuthorisationRequestSM>(context);
+    }
+    public async Task<ClientSM> FindEnabledClientByIdAsync(string clientId)
+    {
+      var client = await _clientStore.FindEnabledClientByIdAsync(clientId);
+      return AutoMapper.Mapper.Map<ClientSM>(client);
+    }
+
+    public bool IsValidReturnUrl(string returnUrl)
+    {
+      return _interaction.IsValidReturnUrl(returnUrl);
+    }
+
+    #region private methods
 
     private async Task CreateDefaultData()
     {
@@ -224,5 +242,6 @@ namespace CJ.IdentityServer.Services.Account
       }
     }
 
+    #endregion
   }
 }

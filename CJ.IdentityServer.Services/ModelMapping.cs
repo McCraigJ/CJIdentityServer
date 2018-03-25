@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using CJ.IdentityServer.ServiceModels;
+using CJ.IdentityServer.ServiceModels.Client;
 using CJ.IdentityServer.ServiceModels.Login;
 using CJ.IdentityServer.ServiceModels.User;
 using CJ.IdentityServer.Services.Models;
@@ -15,6 +17,8 @@ namespace CJ.IdentityServer.Services
     {
       CreateMap<ApplicationUser, UserSM>().ReverseMap();
       CreateMap<LogoutRequest, LogoutResultSM>();
+      CreateMap<AuthorizationRequest, AuthorisationRequestSM>();
+      CreateMap<Client, ClientSM>();
     }
   }
 }

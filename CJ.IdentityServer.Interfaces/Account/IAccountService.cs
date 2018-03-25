@@ -1,4 +1,5 @@
 ﻿using CJ.IdentityServer.ServiceModels;
+using CJ.IdentityServer.ServiceModels.Client;
 using CJ.IdentityServer.ServiceModels.Login;
 using CJ.IdentityServer.ServiceModels.User;
 using System;
@@ -35,5 +36,11 @@ namespace CJ.IdentityServer.Interfaces.Account
     Task<string> GeneratePasswordResetTokenAsync(UserSM user);
 
     Task<InteractionResultSM> ResetPasswordAsync(UserSM user, string code, string password);
+
+    Task<AuthorisationRequestSM> GetAuthorizationContextAsync(string returnUrl);
+
+    Task<ClientSM> FindEnabledClientByIdAsync(string clientId);
+
+    bool IsValidReturnUrl(string returnUrl);
   }
 }
