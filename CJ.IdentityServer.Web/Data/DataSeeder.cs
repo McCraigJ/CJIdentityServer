@@ -1,5 +1,5 @@
-﻿using CJ.IdentityServer.Models;
-using CJ.IdentityServer.Services;
+﻿using CJ.IdentityServer.Services.Models;
+using CJ.IdentityServer.Web.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CJ.IdentityServer.Data
+namespace CJ.IdentityServer.Web.Data
 {
   public class DataSeeder
   {

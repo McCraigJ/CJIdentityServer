@@ -10,12 +10,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using IdentityServer4;
 using IdentityServer4.Services;
-using CJ.IdentityServer.Models;
-using CJ.IdentityServer.Data;
+
+//using CJ.IdentityServer.Data;
 using CJ.IdentityServer.Services;
 using AutoMapper;
+using CJ.IdentityServer.Interfaces.Account;
+using CJ.IdentityServer.Services.Account;
+using CJ.IdentityServer.Services.Data;
+using CJ.IdentityServer.Services.Models;
+using CJ.IdentityServer.Web.Services;
 
-namespace CJ.IdentityServer
+namespace CJ.IdentityServer.Web
 {
   public class Startup
   {
@@ -43,6 +48,7 @@ namespace CJ.IdentityServer
 
       services.AddTransient<IEmailSender, EmailSender>();
       //services.AddTransient<IProfileService, ProfileService>();
+      
 
       services.AddMvc();
       services.AddAutoMapper();
@@ -53,7 +59,9 @@ namespace CJ.IdentityServer
         //.AddInMemoryApiResources(Config.GetApiResources())
         .AddInMemoryIdentityResources(Config.GetIdentityResources())
         .AddInMemoryClients(Config.GetClients(_appSettings))
-        .AddAspNetIdentity<ApplicationUser>();      
+        .AddAspNetIdentity<ApplicationUser>();
+
+      services.AddTransient<IAccountService, AccountService>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

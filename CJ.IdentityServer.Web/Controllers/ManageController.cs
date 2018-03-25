@@ -5,11 +5,11 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using AutoMapper;
-using CJ.IdentityServer.Extensions;
-using CJ.IdentityServer.Helpers;
-using CJ.IdentityServer.Models;
-using CJ.IdentityServer.Services;
-using CJ.IdentityServer.ViewModels.ManageViewModels;
+using CJ.IdentityServer.Services.Models;
+using CJ.IdentityServer.Web.Extensions;
+using CJ.IdentityServer.Web.Helpers;
+using CJ.IdentityServer.Web.Services;
+using CJ.IdentityServer.Web.ViewModels.ManageViewModels;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace CJ.IdentityServer.Controllers
+namespace CJ.IdentityServer.Web.Controllers
 {
   [Authorize]
   [Route("[controller]/[action]")]

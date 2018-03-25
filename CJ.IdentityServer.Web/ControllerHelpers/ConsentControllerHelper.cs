@@ -1,6 +1,7 @@
-﻿using CJ.IdentityServer.Controllers;
-using CJ.IdentityServer.Models;
-using CJ.IdentityServer.ViewModels.ConsentViewModels;
+﻿
+using CJ.IdentityServer.Web.ViewModels.ConsentViewModels;
+using CJ.IdentityServer.Web.Controllers;
+using CJ.IdentityServer.Web.Models;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
@@ -10,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CJ.IdentityServer.ControllerHelpers
+namespace CJ.IdentityServer.Web.ControllerHelpers
 {
   public class ConsentControllerHelper
   {

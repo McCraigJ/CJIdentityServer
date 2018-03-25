@@ -1,10 +1,10 @@
-﻿using CJ.IdentityServer.ViewModels.ConsentViewModels;
+﻿using CJ.IdentityServer.Web.ViewModels.ConsentViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CJ.IdentityServer.Models
+namespace CJ.IdentityServer.Web.Models
 {
   public class ProcessConsentResult
   {

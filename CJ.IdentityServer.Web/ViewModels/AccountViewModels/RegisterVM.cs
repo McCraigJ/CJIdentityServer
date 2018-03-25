@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CJ.IdentityServer.ViewModels.AccountViewModels
+namespace CJ.IdentityServer.Web.ViewModels.AccountViewModels
 {
   public class RegisterVM
   {

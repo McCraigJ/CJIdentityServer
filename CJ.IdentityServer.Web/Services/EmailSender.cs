@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CJ.IdentityServer.Services
+namespace CJ.IdentityServer.Web.Services
 {
   public class EmailSender : IEmailSender
   {

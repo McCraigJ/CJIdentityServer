@@ -9,11 +9,12 @@ using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
-using CJ.IdentityServer.ViewModels.AccountViewModels;
-using CJ.IdentityServer.Models;
+using CJ.IdentityServer.Web.ViewModels.AccountViewModels;
 using System.Collections.Generic;
+using CJ.IdentityServer.Web.Models;
+using CJ.IdentityServer.Services.Models;
 
-namespace CJ.IdentityServer.ControllerHelpers
+namespace CJ.IdentityServer.Web.ControllerHelpers
 {
   public class LoginControllerHelper
   {

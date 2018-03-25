@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CJ.IdentityServer.ControllerHelpers;
-using CJ.IdentityServer.ViewModels.ConsentViewModels;
+using CJ.IdentityServer.Web.ControllerHelpers;
+using CJ.IdentityServer.Web.ViewModels.ConsentViewModels;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace CJ.IdentityServer.Controllers
+namespace CJ.IdentityServer.Web.Controllers
 {
   public class ConsentController : Controller
   {

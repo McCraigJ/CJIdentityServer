@@ -1,11 +1,11 @@
-using CJ.IdentityServer.Services;
+using CJ.IdentityServer.Web.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 
-namespace CJ.IdentityServer.Extensions
+namespace CJ.IdentityServer.Web.Extensions
 {
     public static class EmailSenderExtensions
     {

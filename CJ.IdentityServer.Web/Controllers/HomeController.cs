@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
-namespace CJ.IdentityServer.Controllers
+namespace CJ.IdentityServer.Web.Controllers
 {
   public class HomeController : Controller
   {    

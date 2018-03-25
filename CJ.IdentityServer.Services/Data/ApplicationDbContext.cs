@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CJ.IdentityServer.Web.Data
+namespace CJ.IdentityServer.Services.Data
 {
   public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
   {

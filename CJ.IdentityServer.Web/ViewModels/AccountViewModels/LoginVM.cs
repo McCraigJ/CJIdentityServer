@@ -1,10 +1,10 @@
-﻿using CJ.IdentityServer.Models;
+﻿using CJ.IdentityServer.Web.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CJ.IdentityServer.ViewModels.AccountViewModels
+namespace CJ.IdentityServer.Web.ViewModels.AccountViewModels
 {
   public class LoginVM : LoginInputVM
   {

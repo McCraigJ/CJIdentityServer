@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CJ.IdentityServer
+namespace CJ.IdentityServer.Web
 {
   public static class Config    
   {

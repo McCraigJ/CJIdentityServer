@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
 
-namespace CJ.IdentityServer.Migrations
+namespace CJ.IdentityServer.Web.Migrations
 {
     public partial class AspNetIdentity : Migration
     {

@@ -4,8 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using CJ.IdentityServer.ControllerHelpers;
-using CJ.IdentityServer.Models;
+using CJ.IdentityServer.Web.ControllerHelpers;
 using IdentityModel;
 using IdentityServer4.Events;
 using IdentityServer4.Services;
@@ -15,21 +14,26 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using CJ.IdentityServer.Services;
-using CJ.IdentityServer.ViewModels.AccountViewModels;
-using IdentityServer4.Models;
+using CJ.IdentityServer.Web.Services;
+using CJ.IdentityServer.Web.ViewModels.AccountViewModels;
 using Microsoft.AspNetCore.Authorization;
-using CJ.IdentityServer.Extensions;
+using CJ.IdentityServer.Web.Extensions;
 using AutoMapper;
-using CJ.IdentityServer.Data;
 using Microsoft.Extensions.Configuration;
+using CJ.IdentityServer.Interfaces.Account;
+using CJ.IdentityServer.ServiceModels.Login;
+using CJ.IdentityServer.Services.Models;
+using CJ.IdentityServer.Web.Models;
+using CJ.IdentityServer.Web.Data;
+using CJ.IdentityServer.ServiceModels.User;
 
-namespace CJ.IdentityServer.Controllers
+namespace CJ.IdentityServer.Web.Controllers
 {
   public class AccountController : Controller
   {
     private LoginControllerHelper _loginHelper;
 
+    private readonly IAccountService _accountService;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
@@ -45,6 +49,7 @@ namespace CJ.IdentityServer.Controllers
 
 
     public AccountController(
+        IAccountService accountService,
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager,
         SignInManager<ApplicationUser> signInManager, 
@@ -56,6 +61,7 @@ namespace CJ.IdentityServer.Controllers
         ILogger<AccountController> logger,
         IConfiguration configuration)
     {
+      _accountService = accountService;
       _userManager = userManager;
       _roleManager = roleManager;
       _signInManager = signInManager;
@@ -74,8 +80,9 @@ namespace CJ.IdentityServer.Controllers
 
     public async Task<IActionResult> SeedData()
     {
-      var dataSeeder = new DataSeeder(_userManager, _roleManager, _configuration);
-      await dataSeeder.CreateDefaultData();
+      //var dataSeeder = new DataSeeder(_userManager, _roleManager, _configuration);
+      //await dataSeeder.CreateDefaultData();
+      await _accountService.SeedData();
 
       return RedirectToAction("Login");
     }
@@ -103,36 +110,15 @@ namespace CJ.IdentityServer.Controllers
     {
       if (button != "login")
       {
-        // the user clicked the "cancel" button
-        var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
-        if (context != null)
-        {
-          // if the user cancels, send a result back into IdentityServer as if they 
-          // denied the consent (even if this client does not require consent).
-          // this will send back an access denied OIDC error response to the client.
-          await _interaction.GrantConsentAsync(context, ConsentResponse.Denied);
-
-          // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
-          return Redirect(model.ReturnUrl);
-        }
-        else
-        {
-          // since we don't have a valid context, then we just go back to the home page
-          return Redirect("~/");
-        }
+        var returnUrl = await _accountService.CancelLoginAsync(model.ReturnUrl);
+        return Redirect(returnUrl);
       }
 
       if (ModelState.IsValid)
       {
-        // validate username/password against in-memory store
-        var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberLogin, lockoutOnFailure: false);
+        var result = await _accountService.LoginAsync(AutoMapper.Mapper.Map<LoginSM>(model));
         if (result.Succeeded)
         {
-
-          //var user = await _userManager.GetUserAsync(User);
-          var user = await _signInManager.UserManager.FindByNameAsync(model.Username);
-          await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName));
-
           // only set explicit expiration here if user chooses "remember me". 
           // otherwise we rely upon expiration configured in cookie middleware.
           AuthenticationProperties props = null;
@@ -146,7 +132,7 @@ namespace CJ.IdentityServer.Controllers
           };
 
           // issue authentication cookie with subject ID and username
-          await HttpContext.SignInAsync(user.Id, user.UserName, props);
+          await HttpContext.SignInAsync(result.User.Id, result.User.UserName, props);
 
           // make sure the returnUrl is still valid, and if so redirect back to authorize endpoint or a local page
           // the IsLocalUrl check is only necessary if you want to support additional local pages, otherwise IsValidReturnUrl is more strict
@@ -156,13 +142,11 @@ namespace CJ.IdentityServer.Controllers
           }
 
           return Redirect("~/");
-        }
-
-        await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials"));
+        }        
 
         ModelState.AddModelError("", AccountOptions.InvalidCredentialsErrorMessage);
+        
       }
-
       // something went wrong, show form with error
       var vm = await _loginHelper.BuildLoginViewModelAsync(model);
       return View(vm);
@@ -212,12 +196,13 @@ namespace CJ.IdentityServer.Controllers
       {
         userName = providerUserId;
       }
-      var user = await _userManager.FindByNameAsync(userName);
+      var user = await _accountService.FindUserByNameAsync(userName);
       if (user == null)
       {
-        user = new ApplicationUser { UserName = userName, Id = providerUserId, UserType = (int)UserType.Windows };
-        var createResult = await _userManager.CreateAsync(user, Config.WindowsUserPassword);
+        user = new UserSM { UserName = userName, Id = providerUserId, UserType = (int)UserType.Windows };
+        await _accountService.CreateUserAsync(user, Config.WindowsUserPassword);
       }
+
             
       // this allows us to collect any additonal claims or properties
       // for the specific prtotocols used and store them in the local auth cookie.
@@ -225,9 +210,10 @@ namespace CJ.IdentityServer.Controllers
       var additionalLocalClaims = new List<Claim>();
       var localSignInProps = new AuthenticationProperties();
       _loginHelper.ProcessLoginCallbackForOidc(result, additionalLocalClaims, localSignInProps);
-      
+
       // issue authentication cookie for user
-      await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.UserName, user.UserName));      
+      //await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.UserName, user.UserName));      
+      await _accountService.RaiseLoginSuccessEvent(provider, providerUserId, user.UserName, user.UserName);
       await HttpContext.SignInAsync(user.Id, user.UserName, provider, localSignInProps, additionalLocalClaims.ToArray());
 
       // delete temporary cookie used during external authentication
@@ -297,17 +283,16 @@ namespace CJ.IdentityServer.Controllers
     [HttpGet]
     public async Task<IActionResult> Logout(string logoutId)
     {
-      await _signInManager.SignOutAsync();
+      var logoutResult = await _accountService.LogoutAsync(logoutId);
+      
       //_logger.LogInformation("User logged out.");
-
-      var logout = await _interaction.GetLogoutContextAsync(logoutId);
-
+      
       var vm = new LoggedOutVM
       {
         AutomaticRedirectAfterSignOut = AccountOptions.AutomaticRedirectAfterSignOut,
-        PostLogoutRedirectUri = logout?.PostLogoutRedirectUri,
-        ClientName = string.IsNullOrEmpty(logout?.ClientName) ? logout?.ClientId : logout?.ClientName,
-        SignOutIframeUrl = logout?.SignOutIFrameUrl,
+        PostLogoutRedirectUri = logoutResult?.PostLogoutRedirectUri,
+        ClientName = string.IsNullOrEmpty(logoutResult?.ClientName) ? logoutResult?.ClientId : logoutResult?.ClientName,
+        SignOutIframeUrl = logoutResult?.SignOutIframeUrl,
         LogoutId = logoutId
       };
 
@@ -318,7 +303,10 @@ namespace CJ.IdentityServer.Controllers
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
-      await _signInManager.SignOutAsync();
+
+      await _accountService.LogoutAsync();
+
+      //await _signInManager.SignOutAsync();
       //_logger.LogInformation("User logged out.");
       return RedirectToAction(nameof(HomeController.Index), "Home");
     }
@@ -345,24 +333,25 @@ namespace CJ.IdentityServer.Controllers
       ViewData["ReturnUrl"] = returnUrl;
       if (ModelState.IsValid)
       {
-        var user = Mapper.Map<ApplicationUser>(model);
+        var user = Mapper.Map<UserSM>(model);
         user.UserType = (int)UserType.Standard;
 
         //var user = new ApplicationUser { UserName = model.Email, Email = model.Email, PhoneNumber = model.PhoneNumber };
-        var result = await _userManager.CreateAsync(user, model.Password);
+        //var result = await _userManager.CreateAsync(user, model.Password);
+        var result = await _accountService.CreateUserAsync(user, model.Password);
         if (result.Succeeded)
         {
           _logger.LogInformation("User created a new account with password.");
 
-          var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+          var code = await _accountService.GenerateEmailConfirmationTokenAsync(user);
           var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
           await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
 
-          await _signInManager.SignInAsync(user, isPersistent: false);
+          await _accountService.SignInUserAsync(user, false);
           _logger.LogInformation("User created a new account with password.");
           return RedirectToLocal(returnUrl);
         }
-        AddErrors(result);
+        AddErrors(result.Errors);
       }
 
       // If we got this far, something failed, redisplay form
@@ -377,12 +366,9 @@ namespace CJ.IdentityServer.Controllers
       {
         return RedirectToAction(nameof(HomeController.Index), "Home");
       }
-      var user = await _userManager.FindByIdAsync(userId);
-      if (user == null)
-      {
-        throw new ApplicationException($"Unable to load user with ID '{userId}'.");
-      }
-      var result = await _userManager.ConfirmEmailAsync(user, code);
+
+      var result = await _accountService.ConfirmEmailAsync(userId, code);
+      
       return View(result.Succeeded ? "ConfirmEmail" : "Error");
     }
 
@@ -404,16 +390,27 @@ namespace CJ.IdentityServer.Controllers
     {
       if (ModelState.IsValid)
       {
-        var user = await _userManager.FindByEmailAsync(model.Email);
-        if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+
+        var user = await _accountService.FindUserByEmailAsync(model.Email);
+
+        if (!(await _accountService.IsEmailConfirmedAsync(user)))
         {
           // Don't reveal that the user does not exist or is not confirmed
           return RedirectToAction(nameof(ForgotPasswordConfirmation));
         }
+        
+
+        //var user = await _userManager.FindByEmailAsync(model.Email);
+        //if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+        //{
+
+        //}
 
         // For more information on how to enable account confirmation and password reset please
         // visit https://go.microsoft.com/fwlink/?LinkID=532713
-        var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+        //var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+        var code = await _accountService.GeneratePasswordResetTokenAsync(user);
         var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
         await _emailSender.SendEmailAsync(model.Email, "Reset Password",
            $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
@@ -452,18 +449,20 @@ namespace CJ.IdentityServer.Controllers
       {
         return View(model);
       }
-      var user = await _userManager.FindByEmailAsync(model.Email);
+      //var user = await _userManager.FindByEmailAsync(model.Email);
+      var user = await _accountService.FindUserByEmailAsync(model.Email);
       if (user == null)
       {
         // Don't reveal that the user does not exist
         return RedirectToAction(nameof(ResetPasswordConfirmation));
       }
-      var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+      var result = await _accountService.ResetPasswordAsync(user, model.Code, model.Password);
+      //var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
       if (result.Succeeded)
       {
         return RedirectToAction(nameof(ResetPasswordConfirmation));
       }
-      AddErrors(result);
+      AddErrors(result.Errors);
       return View();
     }
 
@@ -484,11 +483,11 @@ namespace CJ.IdentityServer.Controllers
 
     #region Helpers
 
-    private void AddErrors(IdentityResult result)
+    private void AddErrors(Dictionary<string, string> errors)
     {
-      foreach (var error in result.Errors)
+      foreach (var error in errors)
       {
-        ModelState.AddModelError(string.Empty, error.Description);
+        ModelState.AddModelError(string.Empty, error.Value);
       }
     }
 

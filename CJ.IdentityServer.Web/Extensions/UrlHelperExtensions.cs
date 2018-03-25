@@ -1,4 +1,4 @@
-using CJ.IdentityServer.Controllers;
+using CJ.IdentityServer.Web.Controllers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
