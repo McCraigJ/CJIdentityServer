@@ -3,44 +3,48 @@ using CJ.IdentityServer.Web.ViewModels.ConsentViewModels;
 using CJ.IdentityServer.Web.Controllers;
 using CJ.IdentityServer.Web.Models;
 using IdentityServer4.Models;
-using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CJ.IdentityServer.Interfaces;
+using CJ.IdentityServer.ServiceModels.Identity;
+using CJ.IdentityServer.ServiceModels.Client;
 
 namespace CJ.IdentityServer.Web.ControllerHelpers
 {
   public class ConsentControllerHelper
   {
-    private readonly IIdentityServerInteractionService _interaction;
-    private readonly IClientStore _clientStore;
+    //private readonly IIdentityServerInteractionService _interaction;
+    //private readonly IClientStore _clientStore;
     private readonly IResourceStore _resourceStore;
     private readonly ILogger<ConsentController> _logger;
+    private readonly ISecurableService _securableService;
 
     public ConsentControllerHelper(
-         IIdentityServerInteractionService interaction,
-         IClientStore clientStore,
+         //IIdentityServerInteractionService interaction,
+         //IClientStore clientStore,
          IResourceStore resourceStore,
+         ISecurableService securableService,
          ILogger<ConsentController> logger)
     {
-      _interaction = interaction;
-      _clientStore = clientStore;
+      //_interaction = interaction;
+      //_clientStore = clientStore;
       _resourceStore = resourceStore;
+      _securableService = securableService;
       _logger = logger;
     }
 
     public async Task<ConsentVM> BuildViewModelAsync(string returnUrl, ConsentInputVM model = null)
     {
-      var request = await _interaction.GetAuthorizationContextAsync(returnUrl);
+      AuthorisationRequestSM request = await _securableService.GetAuthorizationContextAsync(returnUrl);
       if (request != null)
       {
-        var client = await _clientStore.FindEnabledClientByIdAsync(request.ClientId);
+        var client = await _securableService.FindEnabledClientByIdAsync(request.ClientId);
         if (client != null)
         {
-          var resources = await _resourceStore.FindEnabledResourcesByScopeAsync(request.ScopesRequested);
+          //var resources = await _resourceStore.FindEnabledResourcesByScopeAsync(request.ScopesRequested);
+          var resources = await _securableService.FindEnabledResourcesByScopeAsync(request.ScopesRequested);
           if (resources != null && (resources.IdentityResources.Any() || resources.ApiResources.Any()))
           {
             return CreateConsentViewModel(model, returnUrl, request, client, resources);
@@ -108,11 +112,11 @@ namespace CJ.IdentityServer.Web.ControllerHelpers
       if (grantedConsent != null)
       {
         // validate return url is still valid
-        var request = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+        var request = await _securableService.GetAuthorizationContextAsync(model.ReturnUrl);
         if (request == null) return result;
 
         // communicate outcome of consent back to identityserver
-        await _interaction.GrantConsentAsync(request, grantedConsent);
+        await _securableService.GrantConsentAsync(request, grantedConsent);
 
         // indicate that's it ok to redirect back to authorization endpoint
         result.RedirectUri = model.ReturnUrl;
@@ -126,7 +130,7 @@ namespace CJ.IdentityServer.Web.ControllerHelpers
       return result;
     }
 
-    private ConsentVM CreateConsentViewModel(ConsentInputVM model, string returnUrl, AuthorizationRequest request, Client client, Resources resources)
+    private ConsentVM CreateConsentViewModel(ConsentInputVM model, string returnUrl, AuthorisationRequestSM request, ClientSM client, SecurableResourcesSM resources)
     {
       var vm = new ConsentVM();
       vm.RememberConsent = model?.RememberConsent ?? true;

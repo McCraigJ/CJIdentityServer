@@ -1,13 +1,10 @@
 ﻿using AutoMapper;
-using CJ.IdentityServer.ServiceModels;
 using CJ.IdentityServer.ServiceModels.Client;
+using CJ.IdentityServer.ServiceModels.Identity;
 using CJ.IdentityServer.ServiceModels.Login;
 using CJ.IdentityServer.ServiceModels.User;
 using CJ.IdentityServer.Services.Models;
 using IdentityServer4.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CJ.IdentityServer.Services
 {
@@ -19,6 +16,14 @@ namespace CJ.IdentityServer.Services
       CreateMap<LogoutRequest, LogoutResultSM>();
       CreateMap<AuthorizationRequest, AuthorisationRequestSM>();
       CreateMap<Client, ClientSM>();
+
+      CreateMap<Secret, SecretSM>();
+      CreateMap<Scope, ScopeSM>();
+
+      CreateMap<IdentityResource, IdentityResourceSM>();
+      CreateMap<ApiResource, ApiResourceSM>();
+      CreateMap<Resources, SecurableResourcesSM>();
+
     }
   }
 }

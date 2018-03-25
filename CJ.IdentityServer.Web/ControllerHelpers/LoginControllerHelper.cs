@@ -1,20 +1,15 @@
-﻿using IdentityModel;
-using IdentityServer4.Services;
+﻿using CJ.IdentityServer.Interfaces;
+using CJ.IdentityServer.Services.Models;
+using CJ.IdentityServer.Web.Models;
+using CJ.IdentityServer.Web.ViewModels.AccountViewModels;
+using IdentityModel;
 using IdentityServer4.Stores;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Principal;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using CJ.IdentityServer.Web.ViewModels.AccountViewModels;
-using System.Collections.Generic;
-using CJ.IdentityServer.Web.Models;
-using CJ.IdentityServer.Services.Models;
-using CJ.IdentityServer.Interfaces.Account;
-using CJ.IdentityServer.ServiceModels.Client;
 
 namespace CJ.IdentityServer.Web.ControllerHelpers
 {
@@ -34,8 +29,7 @@ namespace CJ.IdentityServer.Web.ControllerHelpers
     public async Task<LoginVM> BuildLoginViewModelAsync(string returnUrl)
     {
       var context = await _accountService.GetAuthorizationContextAsync(returnUrl);
-
-      //var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+      
       if (context?.IdP != null)
       {
         // this is meant to short circuit the UI and only trigger the one external IdP

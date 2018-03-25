@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CJ.IdentityServer.ServiceModels
+namespace CJ.IdentityServer.ServiceModels.Identity
 {
   public class InteractionResultSM
   {

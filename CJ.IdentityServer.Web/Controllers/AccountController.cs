@@ -1,31 +1,24 @@
-﻿using System;
+﻿using AutoMapper;
+using CJ.IdentityServer.Interfaces;
+using CJ.IdentityServer.ServiceModels.Login;
+using CJ.IdentityServer.ServiceModels.User;
+using CJ.IdentityServer.Web.ControllerHelpers;
+using CJ.IdentityServer.Web.Extensions;
+using CJ.IdentityServer.Web.Models;
+using CJ.IdentityServer.Web.Services;
+using CJ.IdentityServer.Web.ViewModels.AccountViewModels;
+using IdentityModel;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using CJ.IdentityServer.Web.ControllerHelpers;
-using IdentityModel;
-using IdentityServer4.Events;
-using IdentityServer4.Services;
-using IdentityServer4.Stores;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
-using CJ.IdentityServer.Web.Services;
-using CJ.IdentityServer.Web.ViewModels.AccountViewModels;
-using Microsoft.AspNetCore.Authorization;
-using CJ.IdentityServer.Web.Extensions;
-using AutoMapper;
-using Microsoft.Extensions.Configuration;
-using CJ.IdentityServer.Interfaces.Account;
-using CJ.IdentityServer.ServiceModels.Login;
-using CJ.IdentityServer.Services.Models;
-using CJ.IdentityServer.Web.Models;
-using CJ.IdentityServer.Web.Data;
-using CJ.IdentityServer.ServiceModels.User;
 
 namespace CJ.IdentityServer.Web.Controllers
 {
@@ -34,10 +27,8 @@ namespace CJ.IdentityServer.Web.Controllers
     private LoginControllerHelper _loginHelper;
 
     private readonly IAccountService _accountService;    
-
     private readonly IEmailSender _emailSender;
     private readonly ILogger _logger;
-
 
     public AccountController(
         IAccountService accountService,  
@@ -55,11 +46,8 @@ namespace CJ.IdentityServer.Web.Controllers
     #region Seed Data
 
     public async Task<IActionResult> SeedData()
-    {
-      //var dataSeeder = new DataSeeder(_userManager, _roleManager, _configuration);
-      //await dataSeeder.CreateDefaultData();
+    {     
       await _accountService.SeedData();
-
       return RedirectToAction("Login");
     }
 
@@ -187,8 +175,7 @@ namespace CJ.IdentityServer.Web.Controllers
       var localSignInProps = new AuthenticationProperties();
       _loginHelper.ProcessLoginCallbackForOidc(result, additionalLocalClaims, localSignInProps);
 
-      // issue authentication cookie for user
-      //await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.UserName, user.UserName));      
+      // issue authentication cookie for user      
       await _accountService.RaiseLoginSuccessEvent(provider, providerUserId, user.UserName, user.UserName);
       await HttpContext.SignInAsync(user.Id, user.UserName, provider, localSignInProps, additionalLocalClaims.ToArray());
 
@@ -261,7 +248,7 @@ namespace CJ.IdentityServer.Web.Controllers
     {
       var logoutResult = await _accountService.LogoutAsync(logoutId);
       
-      //_logger.LogInformation("User logged out.");
+      _logger.LogInformation("User logged out.");
       
       var vm = new LoggedOutVM
       {
@@ -281,14 +268,12 @@ namespace CJ.IdentityServer.Web.Controllers
     {
 
       await _accountService.LogoutAsync();
-
-      //await _signInManager.SignOutAsync();
-      //_logger.LogInformation("User logged out.");
+      
+      _logger.LogInformation("User logged out.");
       return RedirectToAction(nameof(HomeController.Index), "Home");
     }
 
     #endregion
-
 
     #region Register
 
@@ -311,9 +296,7 @@ namespace CJ.IdentityServer.Web.Controllers
       {
         var user = Mapper.Map<UserSM>(model);
         user.UserType = (int)UserType.Standard;
-
-        //var user = new ApplicationUser { UserName = model.Email, Email = model.Email, PhoneNumber = model.PhoneNumber };
-        //var result = await _userManager.CreateAsync(user, model.Password);
+        
         var result = await _accountService.CreateUserAsync(user, model.Password);
         if (result.Succeeded)
         {
@@ -377,7 +360,6 @@ namespace CJ.IdentityServer.Web.Controllers
                 
         // For more information on how to enable account confirmation and password reset please
         // visit https://go.microsoft.com/fwlink/?LinkID=532713
-        //var code = await _userManager.GeneratePasswordResetTokenAsync(user);
 
         var code = await _accountService.GeneratePasswordResetTokenAsync(user);
         var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
@@ -417,16 +399,14 @@ namespace CJ.IdentityServer.Web.Controllers
       if (!ModelState.IsValid)
       {
         return View(model);
-      }
-      //var user = await _userManager.FindByEmailAsync(model.Email);
+      }      
       var user = await _accountService.FindUserByEmailAsync(model.Email);
       if (user == null)
       {
         // Don't reveal that the user does not exist
         return RedirectToAction(nameof(ResetPasswordConfirmation));
       }
-      var result = await _accountService.ResetPasswordAsync(user, model.Code, model.Password);
-      //var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+      var result = await _accountService.ResetPasswordAsync(user, model.Code, model.Password);      
       if (result.Succeeded)
       {
         return RedirectToAction(nameof(ResetPasswordConfirmation));
