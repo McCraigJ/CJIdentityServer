@@ -25,7 +25,7 @@ namespace CJ.IdentityServer.Services
       CreateMap<Resources, SecurableResourcesSM>();
 
       CreateMap<AuthorisationRequestSM, AuthorizationRequest>();
-      CreateMap<ConsentResponseSM, ConsentResponse>();
+      CreateMap<ConsentResponseSM, ConsentResponse>();      
 
     }
   }

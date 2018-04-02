@@ -1,8 +1,5 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using CJ.IdentityServer.Interfaces;
-using CJ.IdentityServer.ServiceModels;
-using CJ.IdentityServer.ServiceModels.Client;
 using CJ.IdentityServer.ServiceModels.Identity;
 using CJ.IdentityServer.ServiceModels.Login;
 using CJ.IdentityServer.ServiceModels.User;
@@ -14,7 +11,6 @@ using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -22,8 +18,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
+using AutoMapper.QueryableExtensions;
 
 namespace CJ.IdentityServer.Services.Account
 {
@@ -37,10 +33,11 @@ namespace CJ.IdentityServer.Services.Account
     private readonly IAuthenticationSchemeProvider _schemeProvider;
     private readonly IClientStore _clientStore;
     private readonly IEventService _events;
-    
+
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
     private readonly IConfigurationSection _appSettings;
+    private readonly ApplicationDbContext _data;
 
     public AccountService(
       UserManager<ApplicationUser> userManager,
@@ -50,9 +47,10 @@ namespace CJ.IdentityServer.Services.Account
       IAuthenticationSchemeProvider schemeProvider,
       IClientStore clientStore,
       IEventService events,
-      //IEmailSender emailSender,
       ILogger<AccountService> logger,
-      IConfiguration configuration)
+      IConfiguration configuration,
+      ApplicationDbContext data
+      )
     {
       _userManager = userManager;
       _roleManager = roleManager;
@@ -61,18 +59,18 @@ namespace CJ.IdentityServer.Services.Account
       _schemeProvider = schemeProvider;
       _clientStore = clientStore;
       _events = events;
-      //_emailSender = emailSender;
       _logger = logger;
       _configuration = configuration;
+      _data = data;
 
       _appSettings = configuration.GetSection("AppSettings");
     }
 
     public async Task SeedData()
     {
-      await CreateDefaultData();      
+      await CreateDefaultData();
     }
-    
+
     public async Task<InteractionResultSM> LoginAsync(LoginSM model)
     {
       var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberLogin, lockoutOnFailure: false);
@@ -84,7 +82,7 @@ namespace CJ.IdentityServer.Services.Account
 
         return InteractionResultSMFactory.CreateResult(user, result);
       }
-      
+
       await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials"));
       return InteractionResultSMFactory.CreateResult(null, result);
     }
@@ -107,12 +105,12 @@ namespace CJ.IdentityServer.Services.Account
         // since we don't have a valid context, then we just go back to the home page
         return "~/";
       }
-    }    
+    }
 
     public async Task<UserSM> FindUserByNameAsync(string userName)
     {
       var user = await _userManager.FindByNameAsync(userName);
-      return Mapper.Map<UserSM>(user);      
+      return Mapper.Map<UserSM>(user);
     }
 
     public async Task<UserSM> FindUserByEmailAsync(string email)
@@ -122,7 +120,7 @@ namespace CJ.IdentityServer.Services.Account
     }
 
     public async Task<InteractionResultSM> ConfirmEmailAsync(string userId, string code)
-    {      
+    {
       var user = await _userManager.FindByIdAsync(userId);
       if (user == null)
       {
@@ -130,7 +128,7 @@ namespace CJ.IdentityServer.Services.Account
       }
       var result = await _userManager.ConfirmEmailAsync(user, code);
 
-      return InteractionResultSMFactory.CreateResult(user, result);      
+      return InteractionResultSMFactory.CreateResult(user, result);
     }
 
     public async Task<InteractionResultSM> CreateUserAsync(UserSM user, string password)
@@ -174,19 +172,19 @@ namespace CJ.IdentityServer.Services.Account
     {
       return await _userManager.GeneratePasswordResetTokenAsync(Mapper.Map<ApplicationUser>(user));
     }
-      
+
     public async Task<InteractionResultSM> ResetPasswordAsync(UserSM user, string code, string password)
     {
       IdentityResult result = await _userManager.ResetPasswordAsync(Mapper.Map<ApplicationUser>(user), code, password);
 
-      return InteractionResultSMFactory.CreateResult(user, result);      
+      return InteractionResultSMFactory.CreateResult(user, result);
     }
 
     public async Task RaiseLoginSuccessEvent(string provider, string providerUserId, string subjectId, string name)
     {
-      await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, subjectId, name));      
+      await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, subjectId, name));
     }
-    
+
     public bool IsValidReturnUrl(string returnUrl)
     {
       return _interaction.IsValidReturnUrl(returnUrl);
@@ -194,7 +192,7 @@ namespace CJ.IdentityServer.Services.Account
 
     public async Task<UserSM> GetUserAsync(ClaimsPrincipal principal)
     {
-      var applicationUser = await _userManager.GetUserAsync(principal);      
+      var applicationUser = await _userManager.GetUserAsync(principal);
       return Mapper.Map<UserSM>(applicationUser);
     }
 
@@ -214,6 +212,18 @@ namespace CJ.IdentityServer.Services.Account
       var applicationUser = await _userManager.FindByIdAsync(user.Id);
       var result = await _userManager.ChangePasswordAsync(applicationUser, oldPassword, newPassword);
       return InteractionResultSMFactory.CreateResult(user, result);
+    }
+
+    public IEnumerable<UserSM> GetAllUsers()
+    {
+      return _data.Users.ProjectTo<UserSM>().ToList();
+    }
+
+    public async Task<IEnumerable<string>> GetRolesForUserAsync(UserSM user)
+    {
+      var applicationUser = Mapper.Map<ApplicationUser>(user);
+
+      return await _userManager.GetRolesAsync(applicationUser);
     }
 
     private async Task CreateDefaultData()

@@ -95,8 +95,22 @@ namespace CJ.IdentityServer.Web.Controllers
             };
           };
 
-          // issue authentication cookie with subject ID and username
-          await HttpContext.SignInAsync(result.User.Id, result.User.UserName, props);
+          // issue authentication cookie with subject ID and username -- and roles
+
+          
+          var roles = await _accountService.GetRolesForUserAsync(result.User);
+
+          var claimsId = new ClaimsIdentity();
+          
+          claimsId.AddClaim(new Claim(JwtClaimTypes.Subject, result.User.Id));
+          claimsId.AddClaim(new Claim(JwtClaimTypes.Name, result.User.UserName));
+          var roleClaims = roles.Select(x => new Claim(JwtClaimTypes.Role, x));
+          claimsId.AddClaims(roleClaims);
+
+          await HttpContext.SignInAsync(
+            //result.User.Id, 
+            new ClaimsPrincipal(claimsId),
+            props); //result.User.UserName, props);
 
           // make sure the returnUrl is still valid, and if so redirect back to authorize endpoint or a local page
           // the IsLocalUrl check is only necessary if you want to support additional local pages, otherwise IsValidReturnUrl is more strict

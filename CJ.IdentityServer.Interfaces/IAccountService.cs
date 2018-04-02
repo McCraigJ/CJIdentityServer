@@ -1,6 +1,7 @@
 ﻿using CJ.IdentityServer.ServiceModels.Identity;
 using CJ.IdentityServer.ServiceModels.Login;
 using CJ.IdentityServer.ServiceModels.User;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -42,6 +43,10 @@ namespace CJ.IdentityServer.Interfaces
 
     Task<InteractionResultSM> UpdateUserAsync(UserSM user);
 
-    Task<InteractionResultSM> ChangePasswordAsync(UserSM user, string oldPassword, string newPassword);    
+    Task<InteractionResultSM> ChangePasswordAsync(UserSM user, string oldPassword, string newPassword);
+
+    Task<IEnumerable<string>> GetRolesForUserAsync(UserSM user);
+
+    IEnumerable<UserSM> GetAllUsers();
   }
 }

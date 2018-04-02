@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using CJ.IdentityServer.Interfaces;
-using CJ.IdentityServer.ServiceModels;
 using CJ.IdentityServer.ServiceModels.Client;
 using CJ.IdentityServer.ServiceModels.Identity;
 using IdentityServer4;
@@ -8,9 +7,7 @@ using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CJ.IdentityServer.Services.Identity

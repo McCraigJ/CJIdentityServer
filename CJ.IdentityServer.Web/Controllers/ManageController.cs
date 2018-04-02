@@ -37,9 +37,6 @@ namespace CJ.IdentityServer.Web.Controllers
       _urlEncoder = urlEncoder;
     }
 
-    [TempData]
-    public string StatusMessage { get; set; }
-
     [HttpGet]
     public async Task<IActionResult> Index()
     {

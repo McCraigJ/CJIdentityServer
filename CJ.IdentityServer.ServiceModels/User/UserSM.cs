@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CJ.IdentityServer.ServiceModels.User
+﻿namespace CJ.IdentityServer.ServiceModels.User
 {
 
   public enum UserType
@@ -26,6 +22,8 @@ namespace CJ.IdentityServer.ServiceModels.User
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public int UserType { get; set; }
-    public bool IsEmailConfirmed { get; set; }    
+    public bool IsEmailConfirmed { get; set; }
+
+    public const string SysAdminRoleName = "SystemAdmin";
   }
 }

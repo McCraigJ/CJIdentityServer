@@ -6,6 +6,7 @@ using CJ.IdentityServer.Services.Account;
 using CJ.IdentityServer.Services.Data;
 using CJ.IdentityServer.Services.Identity;
 using CJ.IdentityServer.Services.Models;
+using IdentityServer4.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -41,8 +42,7 @@ namespace CJ.IdentityServer.Web
       
       services.AddTransient<INotificationService, NotificationService>();
       services.AddTransient<INotifierService, EmailNotifierService>();
-
-
+      
       services.AddMvc();
       services.AddAutoMapper();
 
@@ -56,6 +56,8 @@ namespace CJ.IdentityServer.Web
 
       services.AddTransient<IAccountService, AccountService>();
       services.AddTransient<ISecurableService, SecurableService>();
+
+      services.AddTransient<IProfileService, ProfileService>();
 
     }
 

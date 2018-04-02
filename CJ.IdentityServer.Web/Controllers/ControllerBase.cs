@@ -9,6 +9,9 @@ namespace CJ.IdentityServer.Web.Controllers
   public class ControllerBase : Controller
   {
 
+    [TempData]
+    public string StatusMessage { get; set; }
+
     protected void AddErrors(Dictionary<string, string> errors)
     {
       foreach (var error in errors)

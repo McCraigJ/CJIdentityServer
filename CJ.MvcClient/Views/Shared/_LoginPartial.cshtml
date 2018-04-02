@@ -6,7 +6,11 @@
   @if (User.Identity.IsAuthenticated)
   {
 
-    <li><a href="@identityServerAuthority/Manage/Index" title="Manage">Hello @ViewHelper.GetUserName(User.Claims)!</a></li>
+    <li><a href="@identityServerAuthority/Manage/Index" title="Manage">Hello @ViewHelper.GetFirstOrUserName(User.Claims)</a></li>
     <li><a asp-area="" asp-controller="Home" asp-action="Logout">Logout</a></li>
+    @if (ViewHelper.IsAdmin(User.Claims))
+    {
+      <li><a href="@identityServerAuthority/Users/Index" title="Manage Users">Manage Users</a></li>
+    }
   }
 </ul>
