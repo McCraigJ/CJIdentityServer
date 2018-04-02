@@ -1,38 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CJ.IdentityServer.Web.ControllerHelpers;
+﻿using CJ.IdentityServer.Interfaces;
+using CJ.IdentityServer.ServiceModels.Identity;
+using CJ.IdentityServer.Web.Models;
+using CJ.IdentityServer.Web.Factories;
 using CJ.IdentityServer.Web.ViewModels.ConsentViewModels;
-using IdentityServer4.Services;
-using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace CJ.IdentityServer.Web.Controllers
 {
-  public class ConsentController : Controller
-  {
-
-    private readonly IIdentityServerInteractionService _interaction;
-    private readonly IClientStore _clientStore;
-    private readonly IResourceStore _resourceStore;
-    private readonly ILogger<ConsentController> _logger;
-
-    private readonly ConsentControllerHelper _consentHelper;
+  public class ConsentController : ControllerBase
+  {    
+    private readonly ISecurableService _securableService;
+    private readonly ILogger<ConsentController> _logger;    
 
     public ConsentController(
-         IIdentityServerInteractionService interaction,
-         IClientStore clientStore,
-         IResourceStore resourceStore,
+         ISecurableService securableService,         
          ILogger<ConsentController> logger)
-    {
-      _interaction = interaction;
-      _clientStore = clientStore;
-      _resourceStore = resourceStore;
-      _logger = logger;
-
-      _consentHelper = new ConsentControllerHelper(_interaction, _clientStore, _resourceStore, _logger);
+    {      
+      _securableService = securableService;
+      _logger = logger;      
     }
 
     /// <summary>
@@ -43,7 +31,7 @@ namespace CJ.IdentityServer.Web.Controllers
     [HttpGet]
     public async Task<IActionResult> Index(string returnUrl)
     {
-      var vm = await _consentHelper.BuildViewModelAsync(returnUrl);
+      var vm = await ConsentVMFactory.BuildConsentVMAsync(_securableService, _logger, returnUrl);
       if (vm != null)
       {
         return View("Index", vm);
@@ -59,7 +47,7 @@ namespace CJ.IdentityServer.Web.Controllers
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Index(ConsentInputVM model)
     {
-      var result = await _consentHelper.ProcessConsent(model);
+      var result = await ProcessConsentAsync(model);
 
       if (result.IsRedirect)
       {
@@ -77,6 +65,67 @@ namespace CJ.IdentityServer.Web.Controllers
       }
 
       return View("Error");
+    }
+
+    private async Task<ProcessConsentResultPM> ProcessConsentAsync(ConsentInputVM model)
+    {
+      var result = new ProcessConsentResultPM();
+
+      ConsentResponseSM grantedConsent = null;
+
+      // user clicked 'no' - send back the standard 'access_denied' response
+      if (model.Button == "no")
+      {
+        grantedConsent = ConsentResponseSM.Denied;
+      }
+      // user clicked 'yes' - validate the data
+      else if (model.Button == "yes" && model != null)
+      {
+        // if the user consented to some scope, build the response model
+        if (model.ScopesConsented != null && model.ScopesConsented.Any())
+        {
+          var scopes = model.ScopesConsented;
+          if (ConsentOptionsOM.EnableOfflineAccess == false)
+          {
+            scopes = scopes.Where(x => x != _securableService.GetOfflineAccessScopeName()); // IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess);
+          }
+
+          grantedConsent = new ConsentResponseSM
+          {
+            RememberConsent = model.RememberConsent,
+            ScopesConsented = scopes.ToArray()
+          };
+        }
+        else
+        {
+          result.ValidationError = ConsentOptionsOM.MustChooseOneErrorMessage;
+        }
+      }
+      else
+      {
+        result.ValidationError = ConsentOptionsOM.InvalidSelectionErrorMessage;
+      }
+
+      if (grantedConsent != null)
+      {
+        // communicate outcome of consent back to identityserver        
+        var granted = await _securableService.GrantConsentAsync(model.ReturnUrl, grantedConsent);
+
+        if (!granted)
+        {
+          return result;
+        }
+
+        // indicate that's it ok to redirect back to authorization endpoint
+        result.RedirectUri = model.ReturnUrl;
+      }
+      else
+      {
+        // we need to redisplay the consent UI
+        result.ViewModel = await ConsentVMFactory.BuildConsentVMAsync(_securableService, _logger, model.ReturnUrl, model);
+      }
+
+      return result;
     }
 
   }

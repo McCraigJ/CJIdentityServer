@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace CJ.IdentityServer.Web.Models
+﻿namespace CJ.IdentityServer.Web.Models
 {
-  public class ConsentOptions
+  public static class ConsentOptionsOM
   {
     public static bool EnableOfflineAccess = true;
     public static string OfflineAccessDisplayName = "Offline Access";

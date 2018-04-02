@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace CJ.IdentityServer.Web.Controllers
 {
-  public class HomeController : Controller
+  public class HomeController : ControllerBase
   {    
     private readonly IConfigurationSection _appSettings;
 

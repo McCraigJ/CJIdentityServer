@@ -10,6 +10,7 @@ namespace CJ.IdentityServer.Web.ViewModels.ManageViewModels
 {
   public class ManageVM
   {
+    [Display(Name = "User Name")]
     public string Username { get; set; }
 
     public bool IsEmailConfirmed { get; set; }
@@ -34,10 +35,6 @@ namespace CJ.IdentityServer.Web.ViewModels.ManageViewModels
 
     [ReadOnly(true)]
     [Display(Name = "Login Type")]
-    public UserType UserType { get; set; }
-    
-    [ReadOnly(true)]
-    [Display(Name = "User Role")]
-    public string UserRole { get; set; }
+    public string UserType { get; set; }    
   }
 }

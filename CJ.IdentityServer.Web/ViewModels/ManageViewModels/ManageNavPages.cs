@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace CJ.IdentityServer.Web.Views.Manage
+namespace CJ.IdentityServer.Web.ViewModels.ManageViewModels
 {
     public static class ManageNavPages
     {

@@ -1,24 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using IdentityServer4;
-using IdentityServer4.Services;
-
-//using CJ.IdentityServer.Data;
-using CJ.IdentityServer.Services;
-using AutoMapper;
-using CJ.IdentityServer.Interfaces.Account;
+﻿using AutoMapper;
+using CJ.Common.EmailNotification;
+using CJ.Common.Interfaces;
+using CJ.IdentityServer.Interfaces;
 using CJ.IdentityServer.Services.Account;
 using CJ.IdentityServer.Services.Data;
+using CJ.IdentityServer.Services.Identity;
 using CJ.IdentityServer.Services.Models;
-using CJ.IdentityServer.Web.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CJ.IdentityServer.Web
 {
@@ -45,10 +38,10 @@ namespace CJ.IdentityServer.Web
           .AddEntityFrameworkStores<ApplicationDbContext>()
           .AddDefaultTokenProviders();
 
-
-      services.AddTransient<IEmailSender, EmailSender>();
-      //services.AddTransient<IProfileService, ProfileService>();
       
+      services.AddTransient<INotificationService, NotificationService>();
+      services.AddTransient<INotifierService, EmailNotifierService>();
+
 
       services.AddMvc();
       services.AddAutoMapper();
@@ -62,6 +55,8 @@ namespace CJ.IdentityServer.Web
         .AddAspNetIdentity<ApplicationUser>();
 
       services.AddTransient<IAccountService, AccountService>();
+      services.AddTransient<ISecurableService, SecurableService>();
+
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

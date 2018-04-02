@@ -6,12 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Data\DataSeeder.cs" />
     <Compile Remove="Models\ApplicationUser.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
@@ -26,8 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CJ.Common.EmailNotification\CJ.Common.EmailNotification.csproj" />
     <ProjectReference Include="..\CJ.IdentityServer.Interfaces\CJ.IdentityServer.Interfaces.csproj" />
     <ProjectReference Include="..\CJ.IdentityServer.Services\CJ.IdentityServer.Services.csproj" />
+    <ProjectReference Include="..\Common.Interfaces\CJ.Common.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

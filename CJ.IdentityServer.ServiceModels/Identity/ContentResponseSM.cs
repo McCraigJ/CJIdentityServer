@@ -4,14 +4,14 @@ using System.Text;
 
 namespace CJ.IdentityServer.ServiceModels.Identity
 {
-  public class ContentResponseSM
+  public class ConsentResponseSM
   {
 
-    public static ContentResponseSM Denied
+    public static ConsentResponseSM Denied
     {
       get
       {
-        return new ContentResponseSM
+        return new ConsentResponseSM
         {
           RememberConsent = false,
           ScopesConsented = null
@@ -19,7 +19,7 @@ namespace CJ.IdentityServer.ServiceModels.Identity
       }
     }
 
-    private bool _granted;
+    //private bool _granted;
 
     public bool Granted { get; }
 

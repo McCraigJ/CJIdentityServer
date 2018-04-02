@@ -1,9 +1,7 @@
-﻿using CJ.IdentityServer.ServiceModels;
-using CJ.IdentityServer.ServiceModels.Client;
-using CJ.IdentityServer.ServiceModels.Identity;
+﻿using CJ.IdentityServer.ServiceModels.Identity;
 using CJ.IdentityServer.ServiceModels.Login;
 using CJ.IdentityServer.ServiceModels.User;
-using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace CJ.IdentityServer.Interfaces
@@ -39,5 +37,11 @@ namespace CJ.IdentityServer.Interfaces
     Task<InteractionResultSM> ResetPasswordAsync(UserSM user, string code, string password);
     
     bool IsValidReturnUrl(string returnUrl);
+
+    Task<UserSM> GetUserAsync(ClaimsPrincipal user);
+
+    Task<InteractionResultSM> UpdateUserAsync(UserSM user);
+
+    Task<InteractionResultSM> ChangePasswordAsync(UserSM user, string oldPassword, string newPassword);    
   }
 }

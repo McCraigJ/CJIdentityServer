@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CJ.IdentityServer.Web.Models
 {
-  public class AccountOptions
+  public static class AccountOptionsOM
   {
     public static bool AllowLocalLogin = true;
     public static bool AllowRememberLogin = true;

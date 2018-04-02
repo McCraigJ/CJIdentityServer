@@ -1,4 +1,5 @@
 ﻿
+using AutoMapper;
 using CJ.IdentityServer.Interfaces;
 using CJ.IdentityServer.ServiceModels;
 using CJ.IdentityServer.ServiceModels.Client;
@@ -6,6 +7,7 @@ using CJ.IdentityServer.ServiceModels.Identity;
 using CJ.IdentityServer.ServiceModels.Login;
 using CJ.IdentityServer.ServiceModels.User;
 using CJ.IdentityServer.Services.Data;
+using CJ.IdentityServer.Services.Factories;
 using CJ.IdentityServer.Services.Models;
 using IdentityServer4.Events;
 using IdentityServer4.Models;
@@ -19,6 +21,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,8 +37,7 @@ namespace CJ.IdentityServer.Services.Account
     private readonly IAuthenticationSchemeProvider _schemeProvider;
     private readonly IClientStore _clientStore;
     private readonly IEventService _events;
-
-    //private readonly IEmailSender _emailSender;
+    
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
     private readonly IConfigurationSection _appSettings;
@@ -74,16 +76,17 @@ namespace CJ.IdentityServer.Services.Account
     public async Task<InteractionResultSM> LoginAsync(LoginSM model)
     {
       var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberLogin, lockoutOnFailure: false);
+
       if (result.Succeeded)
       {
         var user = await _signInManager.UserManager.FindByNameAsync(model.Username);
         await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName));
 
-        return new InteractionResultSM { Succeeded = true, User = AutoMapper.Mapper.Map<UserSM>(user) };
+        return InteractionResultSMFactory.CreateResult(user, result);
       }
-
+      
       await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials"));
-      return new InteractionResultSM { Succeeded = false, User = null, Errors = null };      
+      return InteractionResultSMFactory.CreateResult(null, result);
     }
 
     public async Task<string> CancelLoginAsync(string returnUrl)
@@ -109,13 +112,13 @@ namespace CJ.IdentityServer.Services.Account
     public async Task<UserSM> FindUserByNameAsync(string userName)
     {
       var user = await _userManager.FindByNameAsync(userName);
-      return AutoMapper.Mapper.Map<UserSM>(user);      
+      return Mapper.Map<UserSM>(user);      
     }
 
     public async Task<UserSM> FindUserByEmailAsync(string email)
     {
       var user = await _userManager.FindByEmailAsync(email);
-      return AutoMapper.Mapper.Map<UserSM>(user);
+      return Mapper.Map<UserSM>(user);
     }
 
     public async Task<InteractionResultSM> ConfirmEmailAsync(string userId, string code)
@@ -127,22 +130,15 @@ namespace CJ.IdentityServer.Services.Account
       }
       var result = await _userManager.ConfirmEmailAsync(user, code);
 
-      if (result.Succeeded)
-      {
-        return new InteractionResultSM { Succeeded = true, User = AutoMapper.Mapper.Map<UserSM>(user) };
-      }
-      return new InteractionResultSM { Succeeded = false, User = null, Errors = result.Errors.ToDictionary(x => x.Code, y => y.Description) };
+      return InteractionResultSMFactory.CreateResult(user, result);      
     }
 
     public async Task<InteractionResultSM> CreateUserAsync(UserSM user, string password)
     {
-      var applicationUser = AutoMapper.Mapper.Map<ApplicationUser>(user);
-      var createResult = await _userManager.CreateAsync(applicationUser, password);      
-      if (createResult.Succeeded)
-      {
-        return new InteractionResultSM { Succeeded = true, User = AutoMapper.Mapper.Map<UserSM>(user) };
-      }
-      return new InteractionResultSM { Succeeded = false, User = null, Errors = createResult.Errors.ToDictionary(x => x.Code, y => y.Description) };
+      var applicationUser = Mapper.Map<ApplicationUser>(user);
+      var createResult = await _userManager.CreateAsync(applicationUser, password);
+      user.Id = applicationUser?.Id;
+      return InteractionResultSMFactory.CreateResult(user, createResult);
     }
 
     public async Task<LogoutResultSM> LogoutAsync(string logoutId = null)
@@ -156,53 +152,69 @@ namespace CJ.IdentityServer.Services.Account
 
       var logout = await _interaction.GetLogoutContextAsync(logoutId);
 
-      return AutoMapper.Mapper.Map<LogoutResultSM>(logout);
+      return Mapper.Map<LogoutResultSM>(logout);
     }
 
     public async Task<string> GenerateEmailConfirmationTokenAsync(UserSM user)
     {
-      return await _userManager.GenerateEmailConfirmationTokenAsync(AutoMapper.Mapper.Map<ApplicationUser>(user));
+      return await _userManager.GenerateEmailConfirmationTokenAsync(Mapper.Map<ApplicationUser>(user));
     }
 
     public async Task SignInUserAsync(UserSM user, bool isPersistent)
     {
-      await _signInManager.SignInAsync(AutoMapper.Mapper.Map<ApplicationUser>(user), isPersistent: false);
+      await _signInManager.SignInAsync(Mapper.Map<ApplicationUser>(user), isPersistent: false);
     }
 
     public async Task<bool> IsEmailConfirmedAsync(UserSM user)
     {
-      return (user != null && !(await _userManager.IsEmailConfirmedAsync(AutoMapper.Mapper.Map<ApplicationUser>(user))));
+      return (user != null && !(await _userManager.IsEmailConfirmedAsync(Mapper.Map<ApplicationUser>(user))));
     }
 
     public async Task<string> GeneratePasswordResetTokenAsync(UserSM user)
     {
-      return await _userManager.GeneratePasswordResetTokenAsync(AutoMapper.Mapper.Map<ApplicationUser>(user));
+      return await _userManager.GeneratePasswordResetTokenAsync(Mapper.Map<ApplicationUser>(user));
     }
       
     public async Task<InteractionResultSM> ResetPasswordAsync(UserSM user, string code, string password)
     {
-      var result = await _userManager.ResetPasswordAsync(AutoMapper.Mapper.Map<ApplicationUser>(user), code, password);
+      IdentityResult result = await _userManager.ResetPasswordAsync(Mapper.Map<ApplicationUser>(user), code, password);
 
-      if (result.Succeeded)
-      {
-        return new InteractionResultSM { Succeeded = true, User = user };
-      }
-      return new InteractionResultSM { Succeeded = false, User = null, Errors = result.Errors.ToDictionary(x => x.Code, y => y.Description) };
+      return InteractionResultSMFactory.CreateResult(user, result);      
     }
 
     public async Task RaiseLoginSuccessEvent(string provider, string providerUserId, string subjectId, string name)
     {
       await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, subjectId, name));      
     }
-
     
-
     public bool IsValidReturnUrl(string returnUrl)
     {
       return _interaction.IsValidReturnUrl(returnUrl);
     }
 
-    #region private methods
+    public async Task<UserSM> GetUserAsync(ClaimsPrincipal principal)
+    {
+      var applicationUser = await _userManager.GetUserAsync(principal);      
+      return Mapper.Map<UserSM>(applicationUser);
+    }
+
+    public async Task<InteractionResultSM> UpdateUserAsync(UserSM user)
+    {
+      var applicationUser = await _userManager.FindByIdAsync(user.Id);
+      applicationUser.FirstName = user.FirstName;
+      applicationUser.LastName = user.LastName;
+      applicationUser.Email = user.Email;
+      applicationUser.PhoneNumber = user.PhoneNumber;
+      var result = await _userManager.UpdateAsync(applicationUser);
+      return InteractionResultSMFactory.CreateResult(user, result);
+    }
+
+    public async Task<InteractionResultSM> ChangePasswordAsync(UserSM user, string oldPassword, string newPassword)
+    {
+      var applicationUser = await _userManager.FindByIdAsync(user.Id);
+      var result = await _userManager.ChangePasswordAsync(applicationUser, oldPassword, newPassword);
+      return InteractionResultSMFactory.CreateResult(user, result);
+    }
 
     private async Task CreateDefaultData()
     {
@@ -235,6 +247,6 @@ namespace CJ.IdentityServer.Services.Account
       }
     }
 
-    #endregion
+    
   }
 }

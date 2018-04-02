@@ -2,10 +2,8 @@
 using CJ.IdentityServer.Interfaces;
 using CJ.IdentityServer.ServiceModels.Login;
 using CJ.IdentityServer.ServiceModels.User;
-using CJ.IdentityServer.Web.ControllerHelpers;
-using CJ.IdentityServer.Web.Extensions;
+using CJ.IdentityServer.Web.Factories;
 using CJ.IdentityServer.Web.Models;
-using CJ.IdentityServer.Web.Services;
 using CJ.IdentityServer.Web.ViewModels.AccountViewModels;
 using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
@@ -22,25 +20,27 @@ using System.Threading.Tasks;
 
 namespace CJ.IdentityServer.Web.Controllers
 {
-  public class AccountController : Controller
+  public class AccountController : ControllerBase
   {
-    private LoginControllerHelper _loginHelper;
-
-    private readonly IAccountService _accountService;    
-    private readonly IEmailSender _emailSender;
+    private readonly IAccountService _accountService;
+    private readonly ISecurableService _securableService;
+    private readonly INotificationService _notificationService;
     private readonly ILogger _logger;
+    private readonly IAuthenticationSchemeProvider _schemeProvider;
 
     public AccountController(
-        IAccountService accountService,  
+        IAccountService accountService,
+        ISecurableService securableService,
         IAuthenticationSchemeProvider schemeProvider,
-        IEmailSender emailSender,
+        INotificationService notificationService, 
         ILogger<AccountController> logger)
     {
-      _accountService = accountService;            
-      _emailSender = emailSender;
+      _accountService = accountService;
+      _securableService = securableService;
+      _schemeProvider = schemeProvider;
+      _notificationService = notificationService;      
       _logger = logger;
       
-      _loginHelper = new LoginControllerHelper(schemeProvider, _accountService);
     }
 
     #region Seed Data
@@ -57,7 +57,7 @@ namespace CJ.IdentityServer.Web.Controllers
 
     public async Task<IActionResult> Login(string returnUrl)
     {
-      var vm = await _loginHelper.BuildLoginViewModelAsync(returnUrl);
+      var vm = await LoginVMFactory.BuildLoginVMAsync(_securableService, _schemeProvider, returnUrl);
 
       if (vm.IsExternalLoginOnly)
       {
@@ -86,12 +86,12 @@ namespace CJ.IdentityServer.Web.Controllers
           // only set explicit expiration here if user chooses "remember me". 
           // otherwise we rely upon expiration configured in cookie middleware.
           AuthenticationProperties props = null;
-          if (AccountOptions.AllowRememberLogin && model.RememberLogin)
+          if (AccountOptionsOM.AllowRememberLogin && model.RememberLogin)
           {
             props = new AuthenticationProperties
             {
               IsPersistent = true,
-              ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
+              ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptionsOM.RememberMeLoginDuration)
             };
           };
 
@@ -108,11 +108,11 @@ namespace CJ.IdentityServer.Web.Controllers
           return Redirect("~/");
         }        
 
-        ModelState.AddModelError("", AccountOptions.InvalidCredentialsErrorMessage);
+        ModelState.AddModelError("", AccountOptionsOM.InvalidCredentialsErrorMessage);
         
       }
       // something went wrong, show form with error
-      var vm = await _loginHelper.BuildLoginViewModelAsync(model);
+      var vm = await LoginVMFactory.BuildLoginVMAsync(_securableService, _schemeProvider, model);
       return View(vm);
     }
 
@@ -173,7 +173,7 @@ namespace CJ.IdentityServer.Web.Controllers
       // this is typically used to store data needed for signout from those protocols.
       var additionalLocalClaims = new List<Claim>();
       var localSignInProps = new AuthenticationProperties();
-      _loginHelper.ProcessLoginCallbackForOidc(result, additionalLocalClaims, localSignInProps);
+      ProcessLoginCallbackForOidc(result, additionalLocalClaims, localSignInProps);
 
       // issue authentication cookie for user      
       await _accountService.RaiseLoginSuccessEvent(provider, providerUserId, user.UserName, user.UserName);
@@ -195,7 +195,7 @@ namespace CJ.IdentityServer.Web.Controllers
     private async Task<IActionResult> ProcessWindowsLoginAsync(string returnUrl)
     {
       // see if windows auth has already been requested and succeeded
-      var result = await HttpContext.AuthenticateAsync(AccountOptions.WindowsAuthenticationSchemeName);
+      var result = await HttpContext.AuthenticateAsync(AccountOptionsOM.WindowsAuthenticationSchemeName);
       if (result?.Principal is WindowsPrincipal wp)
       {
         // we will issue the external cookie and then redirect the
@@ -207,16 +207,16 @@ namespace CJ.IdentityServer.Web.Controllers
           Items =
                     {
                         { "returnUrl", returnUrl },
-                        { "scheme", AccountOptions.WindowsAuthenticationSchemeName },
+                        { "scheme", AccountOptionsOM.WindowsAuthenticationSchemeName },
                     }
         };
 
-        var id = new ClaimsIdentity(AccountOptions.WindowsAuthenticationSchemeName);
+        var id = new ClaimsIdentity(AccountOptionsOM.WindowsAuthenticationSchemeName);
         id.AddClaim(new Claim(JwtClaimTypes.Subject, wp.Identity.Name));
         id.AddClaim(new Claim(JwtClaimTypes.Name, wp.Identity.Name));
 
         // add the groups as claims -- be careful if the number of groups is too large
-        if (AccountOptions.IncludeWindowsGroups)
+        if (AccountOptionsOM.IncludeWindowsGroups)
         {
           var wi = wp.Identity as WindowsIdentity;
           var groups = wi.Groups.Translate(typeof(NTAccount));
@@ -235,7 +235,7 @@ namespace CJ.IdentityServer.Web.Controllers
         // trigger windows auth
         // since windows auth don't support the redirect uri,
         // this URL is re-triggered when we call challenge
-        return Challenge(AccountOptions.WindowsAuthenticationSchemeName);
+        return Challenge(AccountOptionsOM.WindowsAuthenticationSchemeName);
       }
     }
 
@@ -252,7 +252,7 @@ namespace CJ.IdentityServer.Web.Controllers
       
       var vm = new LoggedOutVM
       {
-        AutomaticRedirectAfterSignOut = AccountOptions.AutomaticRedirectAfterSignOut,
+        AutomaticRedirectAfterSignOut = AccountOptionsOM.AutomaticRedirectAfterSignOut,
         PostLogoutRedirectUri = logoutResult?.PostLogoutRedirectUri,
         ClientName = string.IsNullOrEmpty(logoutResult?.ClientName) ? logoutResult?.ClientId : logoutResult?.ClientName,
         SignOutIframeUrl = logoutResult?.SignOutIframeUrl,
@@ -266,7 +266,6 @@ namespace CJ.IdentityServer.Web.Controllers
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
-
       await _accountService.LogoutAsync();
       
       _logger.LogInformation("User logged out.");
@@ -304,7 +303,7 @@ namespace CJ.IdentityServer.Web.Controllers
 
           var code = await _accountService.GenerateEmailConfirmationTokenAsync(user);
           var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-          await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
+          await _notificationService.SendConfirmationNotificationAsync(user, callbackUrl);          
 
           await _accountService.SignInUserAsync(user, false);
           _logger.LogInformation("User created a new account with password.");
@@ -363,10 +362,11 @@ namespace CJ.IdentityServer.Web.Controllers
 
         var code = await _accountService.GeneratePasswordResetTokenAsync(user);
         var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
-        await _emailSender.SendEmailAsync(model.Email, "Reset Password",
-           $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
+
+        await _notificationService.SendForgotPasswordNotificationAsync(user, callbackUrl);        
+        
         return RedirectToAction(nameof(ForgotPasswordConfirmation));
-      }
+      } 
 
       // If we got this far, something failed, redisplay form
       return View(model);
@@ -431,24 +431,22 @@ namespace CJ.IdentityServer.Web.Controllers
     }
 
     #region Helpers
-
-    private void AddErrors(Dictionary<string, string> errors)
+    
+    private void ProcessLoginCallbackForOidc(AuthenticateResult externalResult, List<Claim> localClaims, AuthenticationProperties localSignInProps)
     {
-      foreach (var error in errors)
+      // if the external system sent a session id claim, copy it over
+      // so we can use it for single sign-out
+      var sid = externalResult.Principal.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.SessionId);
+      if (sid != null)
       {
-        ModelState.AddModelError(string.Empty, error.Value);
+        localClaims.Add(new Claim(JwtClaimTypes.SessionId, sid.Value));
       }
-    }
 
-    private IActionResult RedirectToLocal(string returnUrl)
-    {
-      if (Url.IsLocalUrl(returnUrl))
+      // if the external provider issued an id_token, we'll keep it for signout
+      var id_token = externalResult.Properties.GetTokenValue("id_token");
+      if (id_token != null)
       {
-        return Redirect(returnUrl);
-      }
-      else
-      {
-        return RedirectToAction(nameof(HomeController.Index), "Home");
+        localSignInProps.StoreTokens(new[] { new AuthenticationToken { Name = "id_token", Value = id_token } });
       }
     }
 

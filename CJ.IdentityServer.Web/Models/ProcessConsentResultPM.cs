@@ -1,12 +1,8 @@
 ﻿using CJ.IdentityServer.Web.ViewModels.ConsentViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CJ.IdentityServer.Web.Models
 {
-  public class ProcessConsentResult
+  public class ProcessConsentResultPM
   {
     public bool IsRedirect => RedirectUri != null;
     public string RedirectUri { get; set; }

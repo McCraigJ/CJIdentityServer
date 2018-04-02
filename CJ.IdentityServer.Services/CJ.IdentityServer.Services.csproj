@@ -16,12 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CJ.Common.ServiceModels.Notification\CJ.Common.ServiceModels.Notification.csproj" />
     <ProjectReference Include="..\CJ.IdentityServer.Interfaces\CJ.IdentityServer.Interfaces.csproj" />
     <ProjectReference Include="..\CJ.IdentityServer.ServiceModels\CJ.IdentityServer.ServiceModels.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Options\" />
+    <ProjectReference Include="..\Common.Interfaces\CJ.Common.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

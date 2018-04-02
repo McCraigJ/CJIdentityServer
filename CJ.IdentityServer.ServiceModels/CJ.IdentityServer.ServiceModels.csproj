@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>CJ.IdentityServer.Core.ServiceModels</AssemblyName>
+    <RootNamespace>CJ.IdentityServer.Core.ServiceModels</RootNamespace>
   </PropertyGroup>
 
 </Project>

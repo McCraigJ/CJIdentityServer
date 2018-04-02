@@ -1,9 +1,6 @@
-﻿using CJ.IdentityServer.ServiceModels;
-using CJ.IdentityServer.ServiceModels.Client;
+﻿using CJ.IdentityServer.ServiceModels.Client;
 using CJ.IdentityServer.ServiceModels.Identity;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CJ.IdentityServer.Interfaces
@@ -16,8 +13,9 @@ namespace CJ.IdentityServer.Interfaces
 
     Task<SecurableResourcesSM> FindEnabledResourcesByScopeAsync(IEnumerable<string> requestedScopes);
 
-    Task GrantConsentAsync(AuthorisationRequestSM request, )
+    Task<bool> GrantConsentAsync(string returnUrl, ConsentResponseSM grantedConsent);
 
+    string GetOfflineAccessScopeName();
 
   }
 }
