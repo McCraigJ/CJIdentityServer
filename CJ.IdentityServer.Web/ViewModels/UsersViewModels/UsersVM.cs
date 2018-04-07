@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CJ.IdentityServer.Web.ViewModels.UsersViewModels
 {
-  public class UsersVM
+  public class UsersVM : ViewModelBase
   {
     public IEnumerable<UserSM> Users { get; set; }
   }

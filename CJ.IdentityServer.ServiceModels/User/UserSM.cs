@@ -7,7 +7,7 @@
     Windows = 2
   }
 
-  public enum UserRoles
+  public enum UserRole
   {
     Standard = 1,
     SystemAdmin = 2

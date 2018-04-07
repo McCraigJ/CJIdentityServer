@@ -1,6 +1,5 @@
 ﻿using CJ.Common.Interfaces;
 using CJ.Common.ServiceModels.Notification;
-using System;
 using System.Threading.Tasks;
 
 namespace CJ.Common.EmailNotification

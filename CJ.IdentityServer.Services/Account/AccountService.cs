@@ -107,6 +107,11 @@ namespace CJ.IdentityServer.Services.Account
       }
     }
 
+    public async Task<UserSM> FindUserByIdAsync(string userId)
+    {
+      var user = await _userManager.FindByIdAsync(userId);
+      return Mapper.Map<UserSM>(user);
+    }
     public async Task<UserSM> FindUserByNameAsync(string userName)
     {
       var user = await _userManager.FindByNameAsync(userName);
@@ -226,6 +231,16 @@ namespace CJ.IdentityServer.Services.Account
       return await _userManager.GetRolesAsync(applicationUser);
     }
 
+    public async Task<InteractionResultSM> UpdateUserRolesAsync(string userId, IEnumerable<string> addToRoles, IEnumerable<string> removeFromRoles)
+    {
+      var applicationUser = await _userManager.FindByIdAsync(userId);
+      
+      var addResult = await _userManager.AddToRolesAsync(applicationUser, addToRoles);
+      var removeResult = await _userManager.RemoveFromRolesAsync(applicationUser, removeFromRoles);
+
+      return InteractionResultSMFactory.CreateResult(applicationUser, addResult);      
+    }
+
     private async Task CreateDefaultData()
     {
       if (Convert.ToBoolean(_appSettings["SeedData"]) == true)
@@ -233,7 +248,7 @@ namespace CJ.IdentityServer.Services.Account
         // Seed roles
         if (!_roleManager.Roles.Any())
         {
-          var roles = Enum.GetValues(typeof(UserRoles));
+          var roles = Enum.GetValues(typeof(UserRole));
           foreach (var r in roles)
           {
             var result = await _roleManager.CreateAsync(new IdentityRole { Name = r.ToString() });
@@ -251,7 +266,7 @@ namespace CJ.IdentityServer.Services.Account
           var resultUser = await _userManager.CreateAsync(user, "_Install123");
           if (resultUser.Succeeded)
           {
-            var resultAddToRole = await _userManager.AddToRoleAsync(user, UserRoles.SystemAdmin.ToString());
+            var resultAddToRole = await _userManager.AddToRoleAsync(user, UserRole.SystemAdmin.ToString());
           }
         }
       }

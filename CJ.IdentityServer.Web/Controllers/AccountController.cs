@@ -177,7 +177,9 @@ namespace CJ.IdentityServer.Web.Controllers
       var user = await _accountService.FindUserByNameAsync(userName);
       if (user == null)
       {
-        user = new UserSM { UserName = userName, Id = providerUserId, UserType = (int)UserType.Windows };
+        user = new UserSM { UserName = userName,
+          Id = Guid.NewGuid().ToString(), // providerUserId,
+          UserType = (int)UserType.Windows };
         await _accountService.CreateUserAsync(user, Config.WindowsUserPassword);
       }
 

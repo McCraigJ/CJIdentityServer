@@ -15,6 +15,8 @@ namespace CJ.IdentityServer.Interfaces
 
     Task<string> CancelLoginAsync(string returnUrl);
 
+    Task<UserSM> FindUserByIdAsync(string userName);
+
     Task<UserSM> FindUserByNameAsync(string userName);
 
     Task<UserSM> FindUserByEmailAsync(string email);
@@ -48,5 +50,7 @@ namespace CJ.IdentityServer.Interfaces
     Task<IEnumerable<string>> GetRolesForUserAsync(UserSM user);
 
     IEnumerable<UserSM> GetAllUsers();
+
+    Task<InteractionResultSM> UpdateUserRolesAsync(string userId, IEnumerable<string> addToRoles, IEnumerable<string> removeFromRoles);
   }
 }

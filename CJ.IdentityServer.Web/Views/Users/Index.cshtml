@@ -6,6 +6,8 @@
 
 <h2>@ViewData["Title"]</h2>
 
+@Html.Partial("_StatusMessage", Model.StatusMessage)
+
 @if (Model.Users.Any())
 {
   <table class="table">
@@ -21,7 +23,7 @@
       @foreach (var u in Model.Users)
       {
         <tr>
-          <td><a asp-area="" asp-controller="Users" asp-action="Update" asp-route-id="@u.Id">Update Role</a></td>
+          <td><a asp-area="" asp-controller="Users" asp-action="UpdateRole" asp-route-id="@u.Id">Update Role</a></td>
           <td>@u.UserName</td>
           <td>@u.FirstName @u.LastName</td>
         </tr>

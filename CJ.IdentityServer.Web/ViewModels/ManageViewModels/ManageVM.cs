@@ -1,14 +1,9 @@
-﻿using CJ.IdentityServer.ServiceModels.User;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CJ.IdentityServer.Web.ViewModels.ManageViewModels
 {
-  public class ManageVM
+  public class ManageVM : ViewModelBase
   {
     [Display(Name = "User Name")]
     public string Username { get; set; }
@@ -21,9 +16,7 @@ namespace CJ.IdentityServer.Web.ViewModels.ManageViewModels
 
     [Phone]
     [Display(Name = "Phone number")]
-    public string PhoneNumber { get; set; }
-
-    public string StatusMessage { get; set; }
+    public string PhoneNumber { get; set; }    
 
     [StringLength(15, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 0)]
     [Display(Name = "First Name")]

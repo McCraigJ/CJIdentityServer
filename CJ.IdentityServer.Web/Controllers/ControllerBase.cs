@@ -8,7 +8,6 @@ namespace CJ.IdentityServer.Web.Controllers
 {
   public class ControllerBase : Controller
   {
-
     [TempData]
     public string StatusMessage { get; set; }
 
