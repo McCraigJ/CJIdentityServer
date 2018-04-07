@@ -10,7 +10,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
+    <Content Remove="wwwroot\src\styles\site.less" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\src\styles\site.less" />
   </ItemGroup>
 
   <ItemGroup>

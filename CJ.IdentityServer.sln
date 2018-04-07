@@ -31,7 +31,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common.Services", "Common.S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CJ.Common.EmailNotification", "CJ.Common.EmailNotification\CJ.Common.EmailNotification.csproj", "{4B8C09CA-5A31-4563-B909-0C4843C57C56}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CJ.Common.ServiceModels.Notification", "CJ.Common.ServiceModels.Notification\CJ.Common.ServiceModels.Notification.csproj", "{333B880F-529D-41E9-AE4F-09D51C838C1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CJ.Common.ServiceModels.Notification", "CJ.Common.ServiceModels.Notification\CJ.Common.ServiceModels.Notification.csproj", "{333B880F-529D-41E9-AE4F-09D51C838C1D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E5B9501F-9264-41FF-9C8A-9DF0F16F50E5}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
