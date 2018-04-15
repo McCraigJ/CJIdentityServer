@@ -4,34 +4,40 @@
   ViewData["Title"] = "Users";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="ui container">
+  <div class="ui segment block colour">
 
-@Html.Partial("_StatusMessage", Model.StatusMessage)
+    <h1>@ViewData["Title"]</h1>
 
-@if (Model.Users.Any())
-{
-  <table class="table">
-    <thead>
-      <tr>
-        <td></td>
-        <th scope="col">User</th>
-        <th scope="col">Name</th>
-      </tr>
-    </thead>
-    <tbody>
+    @Html.Partial("_StatusMessage", Model.StatusMessage)
 
-      @foreach (var u in Model.Users)
-      {
+    @if (Model.Users.Any())
+    {
+    <table class="ui celled striped table">
+      <thead>
         <tr>
-          <td><a asp-area="" asp-controller="Users" asp-action="UpdateRole" asp-route-id="@u.Id">Update Role</a></td>
-          <td>@u.UserName</td>
-          <td>@u.FirstName @u.LastName</td>
+          <th scope="col">Update</th>
+          <th scope="col">User</th>
+          <th scope="col">Name</th>
         </tr>
-      }
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+
+        @foreach (var u in Model.Users)
+    {
+      <tr>
+        <td><a asp-area="" asp-controller="Users" asp-action="UpdateRole" asp-route-id="@u.Id">Update Role</a></td>
+        <td>@u.UserName</td>
+        <td>@u.FirstName @u.LastName</td>
+      </tr>
 }
-else
-{
-  <p>No users found</p>
-}
+      </tbody>
+    </table>
+    }
+    else
+    {
+      <p>No users found</p>
+    }
+
+  </div>
+</div>

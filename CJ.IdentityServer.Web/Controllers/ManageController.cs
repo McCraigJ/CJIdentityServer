@@ -2,6 +2,7 @@
 using CJ.IdentityServer.Interfaces;
 using CJ.IdentityServer.ServiceModels.User;
 using CJ.IdentityServer.Web.Helpers;
+using CJ.IdentityServer.Web.ViewModels;
 using CJ.IdentityServer.Web.ViewModels.ManageViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -71,7 +72,7 @@ namespace CJ.IdentityServer.Web.Controllers
         throw new ApplicationException(@"Unexpected error occurred updating user");
       }
 
-      StatusMessage = "Your profile has been updated";
+      StatusMessage = new StatusMessageVM(true, "Your profile has been updated");
       return RedirectToAction(nameof(Index));
     }
 
@@ -92,10 +93,10 @@ namespace CJ.IdentityServer.Web.Controllers
       var response = await _notificationService.SendConfirmationNotificationAsync(user, callbackUrl);
       if (response.Success)
       {
-        StatusMessage = "Verification email sent. Please check your email.";
+        StatusMessage = new StatusMessageVM(true, "Verification email sent. Please check your email.");
       } else
       {
-        StatusMessage = "An error occurred";
+        StatusMessage = new StatusMessageVM(false, "An error occurred");
       }
 
       
@@ -136,7 +137,7 @@ namespace CJ.IdentityServer.Web.Controllers
 
       await _accountService.SignInUserAsync(user, isPersistent: false);
       _logger.LogInformation("User changed their password successfully.");
-      StatusMessage = "Your password has been changed.";
+      StatusMessage = new StatusMessageVM(true, "Your password has been changed.");
 
       return RedirectToAction(nameof(ChangePassword));
     }

@@ -70,7 +70,7 @@ namespace CJ.IdentityServer.Web.Controllers
 
         if (User.Claims.FirstOrDefault(x => x.Type == "sub")?.Value == model.Id)
         {
-          StatusMessage = "Cannot update the logged-in user's role";
+          StatusMessage = new StatusMessageVM(false, "Cannot update the logged-in user's role");
           return RedirectToAction("Index");
         }
 
@@ -89,7 +89,7 @@ namespace CJ.IdentityServer.Web.Controllers
         }
         await _accountService.UpdateUserRolesAsync(model.Id, addToRoles, removeFromRoles);
 
-        StatusMessage = "User Roles Updated for " + model.UserName;
+        StatusMessage = new StatusMessageVM(true, "User Roles Updated for " + model.UserName);
         return RedirectToAction("Index");
       }
 
