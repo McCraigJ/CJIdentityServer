@@ -198,6 +198,7 @@ namespace CJ.IdentityServer.Services.Account
     public async Task<UserSM> GetUserAsync(ClaimsPrincipal principal)
     {
       var applicationUser = await _userManager.GetUserAsync(principal);
+      
       return Mapper.Map<UserSM>(applicationUser);
     }
 

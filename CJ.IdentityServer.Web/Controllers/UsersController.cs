@@ -1,5 +1,6 @@
 ﻿using CJ.IdentityServer.Interfaces;
 using CJ.IdentityServer.ServiceModels.User;
+using CJ.IdentityServer.Web.Attributes;
 using CJ.IdentityServer.Web.ViewModels;
 using CJ.IdentityServer.Web.ViewModels.UsersViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,8 @@ using System.Threading.Tasks;
 
 namespace CJ.IdentityServer.Web.Controllers
 {
-  [Authorize(Roles = UserSM.SysAdminRoleName)]
+  //[Authorize(Roles = UserSM.SysAdminRoleName)]
+  [CJAuthorise(Roles = UserSM.SysAdminRoleName)]
   [Route("[controller]/[action]")]
   public class UsersController : ControllerBase
   {

@@ -9,8 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "gulp": "3.9.1",
-    "jquery" : "3.3.1",
+    "jquery": "3.3.1",
     "jquery-validation": "^1.17.0",
     "jquery-validation-unobtrusive": "^3.2.9",
     "semantic-ui-less": "^2.3.1"
@@ -21,6 +20,7 @@
     "del": "^3.0.0",
     "extract-text-webpack-plugin": "^2.1.2",
     "file-loader": "^0.11.2",
+    "gulp": "^3.9.1",
     "gulp-less": "4.0.0",
     "less": "^2.7.2",
     "less-loader": "^4.0.4",

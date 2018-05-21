@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20180319163435_AspNetIdentity.cs" />
+    <Compile Remove="Migrations\20180319163435_AspNetIdentity.Designer.cs" />
     <Compile Remove="Models\ApplicationUser.cs" />
   </ItemGroup>
 

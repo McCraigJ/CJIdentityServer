@@ -33,7 +33,7 @@ namespace CJ.IdentityServer.Web
     public void ConfigureServices(IServiceCollection services)
     {
       services.AddDbContext<ApplicationDbContext>(options =>
-          options.UseSqlServer(_configuration.GetConnectionString("DefaultConnection")));
+          options.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"), b=> b.MigrationsAssembly("CJ.IdentityServer.Web")));
 
       services.AddIdentity<ApplicationUser, IdentityRole>()
           .AddEntityFrameworkStores<ApplicationDbContext>()

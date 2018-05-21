@@ -11,17 +11,17 @@ using System;
 namespace CJ.IdentityServer.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20180319163435_AspNetIdentity")]
-    partial class AspNetIdentity
+    [Migration("20180521210504_Identity")]
+    partial class Identity
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.0.1-rtm-125")
+                .HasAnnotation("ProductVersion", "2.0.2-rtm-10011")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("CJ.IdentityServer.Models.ApplicationUser", b =>
+            modelBuilder.Entity("CJ.IdentityServer.Services.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
@@ -196,7 +196,7 @@ namespace CJ.IdentityServer.Web.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("CJ.IdentityServer.Models.ApplicationUser")
+                    b.HasOne("CJ.IdentityServer.Services.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -204,7 +204,7 @@ namespace CJ.IdentityServer.Web.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("CJ.IdentityServer.Models.ApplicationUser")
+                    b.HasOne("CJ.IdentityServer.Services.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -217,7 +217,7 @@ namespace CJ.IdentityServer.Web.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("CJ.IdentityServer.Models.ApplicationUser")
+                    b.HasOne("CJ.IdentityServer.Services.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -225,7 +225,7 @@ namespace CJ.IdentityServer.Web.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("CJ.IdentityServer.Models.ApplicationUser")
+                    b.HasOne("CJ.IdentityServer.Services.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
